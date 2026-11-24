@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription, SensorStateClass
-from homeassistant.const import UnitOfTemperature, UnitOfPower, UnitOfPressure
+from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, EntityCategory, UnitOfTemperature, UnitOfPower, UnitOfPressure
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityDescription, generate_entity_id
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -21,6 +21,12 @@ SENSOR_TYPES = {
     "temperature": {"class": SensorDeviceClass.TEMPERATURE, "unit": UnitOfTemperature.CELSIUS, "state_class": SensorStateClass.MEASUREMENT},
     "pressure": {"class": SensorDeviceClass.PRESSURE, "unit": UnitOfPressure.BAR, "state_class": SensorStateClass.MEASUREMENT},
     "power": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.WATT, "state_class": SensorStateClass.MEASUREMENT},
+    "power_kw": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.KILO_WATT, "state_class": SensorStateClass.MEASUREMENT},
+    "percentage": {"unit": PERCENTAGE, "state_class": SensorStateClass.MEASUREMENT},
+    "rpm": {"unit": REVOLUTIONS_PER_MINUTE, "state_class": SensorStateClass.MEASUREMENT},
+    "counter": {"state_class": SensorStateClass.TOTAL_INCREASING},
+    "raw": {},
+    "text": {},
     "measurement": {"state_class": SensorStateClass.MEASUREMENT},
     "enum": {"class": SensorDeviceClass.ENUM}
 }
@@ -59,6 +65,13 @@ class EcoforestEntity(CoordinatorEntity[EcoforestCoordinator]):
                 key=key,
                 translation_key=key
             )
+
+        self._definition = definition
+        self._attr_entity_registry_enabled_default = definition.get("enabled_default", True)
+        if definition.get("diagnostic"):
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        elif definition.get("writable") and definition["entity_type"] != "switch":
+            self._attr_entity_category = EntityCategory.CONFIG
 
         device_id = coordinator.data.model_name if device_alias is None else device_alias
         device_name = MANUFACTURER if device_alias is None else device_alias

@@ -54,20 +54,17 @@ class EcoforestNumberEntity(EcoforestEntity, NumberEntity):
 
     entity_description: EcoforestNumberEntityDescription
 
-    # todo: use specs
     @property
     def native_min_value(self) -> float:
-        return 0
+        return self._definition.get("min", 0)
 
-    # todo: use specs
     @property
     def native_max_value(self) -> float:
-        return 1000
+        return self._definition.get("max", 1000)
 
-    # todo: use specs
     @property
     def native_step(self) -> float:
-        return 0.1
+        return self._definition.get("step", 0.1)
 
     @property
     def mode(self):

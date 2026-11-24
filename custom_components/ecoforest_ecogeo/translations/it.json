@@ -1,0 +1,493 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "host": "URL Ecoforest Easynet (es. http://192.168.1.200/)",
+          "username": "Nome utente",
+          "password": "Password",
+          "alias": "Alias"
+        },
+        "data_description": {
+          "alias": "Lascia vuoto per usare il modello della pompa di calore come ID dispositivo"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossibile connettersi",
+      "invalid_auth": "Autenticazione non valida",
+      "unknown": "Errore imprevisto"
+    },
+    "abort": {
+      "already_configured": "Dispositivo già configurato"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "alarm": {
+        "name": "Allarme",
+        "state": {
+          "0": "No alarm",
+          "1": "Clock Board fault or not connected",
+          "2": "Extended memory fault",
+          "3": "Low outdoor temp. & Low ground temp.",
+          "7": "AI3 Probe failure. Compressor discharge pressure",
+          "8": "AI4 Probe failure. Brine outlet temperature",
+          "9": "AI5 Probe failure. Brine return temperature",
+          "10": "AI6 Probe failure. Brine circuit pressure",
+          "11": "AI7 Probe failure. Heating outlet temperature",
+          "12": "AI8 Probe failure. Heating inlet temperature",
+          "13": "AI9 Probe failure. Heating circuit pressure",
+          "14": "AI10 Probe failure. Tank temperature 1 (DHW)",
+          "15": "AI11 Probe failure. Outdoor temperature probe",
+          "16": "AI12 Probe fault",
+          "17": "Low brine inlet temperature",
+          "18": "High discharge pressure",
+          "19": "High discharge temperature",
+          "20": "Inverter temperature",
+          "21": "Low brine outlet temperature",
+          "24": "Ecogeo internal probes fault",
+          "25": "Low pressure brine circuit",
+          "26": "Low pressure Heating circuit",
+          "33": "Evaporation temperature",
+          "34": "Low suction pressure",
+          "36": "AI2 Probe failure Compressor suction Pressure",
+          "37": "AI1 Probe failure. Compressor suction temperature",
+          "38": "Low superheat (lowSH)",
+          "39": "Low evaporation temperature (LOP)",
+          "40": "High evaporation temperature (MOP)",
+          "41": "Low suction temperature",
+          "212": "Inverter comms fault",
+          "213": "High brine temperature",
+          "214": "pCOe number:AI13 Analog input probe on channel 1 disconnected or broken",
+          "215": "pCOe number:AI14 Analog input probe on channel 2 disconnected or broken",
+          "216": "pCOe number:AI15 Analog input probe on channel 3 disconnected or broken",
+          "217": "pCOe number:AI16 Analog input probe on channel 4 disconnected or broken",
+          "218": "pCOe number: pCOe offline",
+          "219": "th-T 1 Error (thermostat for DG1) **",
+          "220": "th-T 1 offline (thermostat for DG1) **",
+          "221": "th-T 2 Error (thermostat for SG2) **",
+          "222": "th-T 2 offline (thermostat for SG2) **",
+          "223": "th-T 3 Error (thermostat for SG3) **",
+          "224": "th-T 3 offline (thermostat for SG3) **",
+          "225": "th-T 4 Error (thermostat for SG4) **",
+          "226": "th-T 4 offline (thermostat for SG4) **"
+        }
+      },
+      "t_outdoor": {
+        "name": "Temperatura esterna"
+      },
+      "t_dhw": {
+        "name": "Temperatura ACS"
+      },
+      "t_cooling": {
+        "name": "Temperatura accumulo freddo"
+      },
+      "t_heating": {
+        "name": "Temperatura accumulo caldo"
+      },
+      "t_dg1_h": {
+        "name": "Temperatura mandata DG1 (riscaldamento)"
+      },
+      "t_dg1_c": {
+        "name": "Temperatura DG1 (raffrescamento)"
+      },
+      "t_sg2": {
+        "name": "Temperatura mandata SG2"
+      },
+      "t_sg3": {
+        "name": "Temperatura mandata SG3"
+      },
+      "t_sg4": {
+        "name": "Temperatura mandata SG4"
+      },
+      "power_heating": {
+        "name": "Potenza termica resa"
+      },
+      "power_cooling": {
+        "name": "Potenza frigorifera resa"
+      },
+      "power_electric": {
+        "name": "Potenza elettrica"
+      },
+      "power_output": {
+        "name": "Potenza resa totale"
+      },
+      "t_brine_in": {
+        "name": "Temperatura ritorno geotermia"
+      },
+      "t_brine_out": {
+        "name": "Temperatura mandata geotermia"
+      },
+      "p_brine": {
+        "name": "Pressione circuito geotermia"
+      },
+      "p_output": {
+        "name": "Pressione circuito produzione"
+      },
+      "cop": {
+        "name": "COP"
+      },
+      "pf": {
+        "name": "PF"
+      },
+      "t_production_in": {
+        "name": "Temperatura ritorno produzione"
+      },
+      "t_compressor_suction": {
+        "name": "Temperatura aspirazione compressore"
+      },
+      "p_compressor_suction": {
+        "name": "Pressione aspirazione compressore"
+      },
+      "p_compressor_discharge": {
+        "name": "Pressione scarico compressore"
+      },
+      "t_airunit_out": {
+        "name": "Temperatura uscita aerotermo"
+      },
+      "t_condensation": {
+        "name": "Temperatura di condensazione"
+      },
+      "superheat": {
+        "name": "Surriscaldamento"
+      },
+      "expansion_valve": {
+        "name": "Posizione valvola di espansione"
+      },
+      "t_dhw_start": {
+        "name": "Temperatura avvio ACS"
+      },
+      "t_evaporation": {
+        "name": "Temperatura di evaporazione"
+      },
+      "eer": {
+        "name": "EER"
+      },
+      "t_compressor_discharge": {
+        "name": "Temperatura scarico compressore"
+      },
+      "t_bus_thermostat_dg1": {
+        "name": "Temperatura termostato BUS DG1"
+      },
+      "t_bus_thermostat_sg2": {
+        "name": "Temperatura termostato BUS SG2"
+      },
+      "t_bus_thermostat_sg3": {
+        "name": "Temperatura termostato BUS SG3"
+      },
+      "t_bus_thermostat_sg4": {
+        "name": "Temperatura termostato BUS SG4"
+      },
+      "compressor_rpm": {
+        "name": "Giri compressore"
+      },
+      "t_scroll": {
+        "name": "Temperatura scroll"
+      },
+      "t_inverter": {
+        "name": "Temperatura inverter"
+      },
+      "working_hours_l": {
+        "name": "Ore di funzionamento (parte bassa)"
+      },
+      "working_hours_h": {
+        "name": "Ore di funzionamento (parte alta)"
+      },
+      "starts_counter": {
+        "name": "Avviamenti compressore"
+      },
+      "starts_counter_x1000": {
+        "name": "Avviamenti compressore x1000"
+      },
+      "software_version_1": {
+        "name": "Versione software 1"
+      },
+      "software_version_2": {
+        "name": "Versione software 2"
+      },
+      "software_version_3": {
+        "name": "Versione software 3"
+      },
+      "hp_state": {
+        "name": "Stato pompa di calore"
+      },
+      "season_mode": {
+        "name": "Modo stagionale"
+      },
+      "device_clock": {
+        "name": "Orologio dispositivo"
+      },
+      "energy_condensation_01": {
+        "name": "Energia di condensazione gennaio"
+      },
+      "energy_evaporation_01": {
+        "name": "Energia di evaporazione gennaio"
+      },
+      "energy_electric_01": {
+        "name": "Consumo elettrico gennaio"
+      },
+      "energy_condensation_02": {
+        "name": "Energia di condensazione febbraio"
+      },
+      "energy_evaporation_02": {
+        "name": "Energia di evaporazione febbraio"
+      },
+      "energy_electric_02": {
+        "name": "Consumo elettrico febbraio"
+      },
+      "energy_condensation_03": {
+        "name": "Energia di condensazione marzo"
+      },
+      "energy_evaporation_03": {
+        "name": "Energia di evaporazione marzo"
+      },
+      "energy_electric_03": {
+        "name": "Consumo elettrico marzo"
+      },
+      "energy_condensation_04": {
+        "name": "Energia di condensazione aprile"
+      },
+      "energy_evaporation_04": {
+        "name": "Energia di evaporazione aprile"
+      },
+      "energy_electric_04": {
+        "name": "Consumo elettrico aprile"
+      },
+      "energy_condensation_05": {
+        "name": "Energia di condensazione maggio"
+      },
+      "energy_evaporation_05": {
+        "name": "Energia di evaporazione maggio"
+      },
+      "energy_electric_05": {
+        "name": "Consumo elettrico maggio"
+      },
+      "energy_condensation_06": {
+        "name": "Energia di condensazione giugno"
+      },
+      "energy_evaporation_06": {
+        "name": "Energia di evaporazione giugno"
+      },
+      "energy_electric_06": {
+        "name": "Consumo elettrico giugno"
+      },
+      "energy_condensation_07": {
+        "name": "Energia di condensazione luglio"
+      },
+      "energy_evaporation_07": {
+        "name": "Energia di evaporazione luglio"
+      },
+      "energy_electric_07": {
+        "name": "Consumo elettrico luglio"
+      },
+      "energy_condensation_08": {
+        "name": "Energia di condensazione agosto"
+      },
+      "energy_evaporation_08": {
+        "name": "Energia di evaporazione agosto"
+      },
+      "energy_electric_08": {
+        "name": "Consumo elettrico agosto"
+      },
+      "energy_condensation_09": {
+        "name": "Energia di condensazione settembre"
+      },
+      "energy_evaporation_09": {
+        "name": "Energia di evaporazione settembre"
+      },
+      "energy_electric_09": {
+        "name": "Consumo elettrico settembre"
+      },
+      "energy_condensation_10": {
+        "name": "Energia di condensazione ottobre"
+      },
+      "energy_evaporation_10": {
+        "name": "Energia di evaporazione ottobre"
+      },
+      "energy_electric_10": {
+        "name": "Consumo elettrico ottobre"
+      },
+      "energy_condensation_11": {
+        "name": "Energia di condensazione novembre"
+      },
+      "energy_evaporation_11": {
+        "name": "Energia di evaporazione novembre"
+      },
+      "energy_electric_11": {
+        "name": "Consumo elettrico novembre"
+      },
+      "energy_condensation_12": {
+        "name": "Energia di condensazione dicembre"
+      },
+      "energy_evaporation_12": {
+        "name": "Energia di evaporazione dicembre"
+      },
+      "energy_electric_12": {
+        "name": "Consumo elettrico dicembre"
+      }
+    },
+    "number": {
+      "number_dhw_setpoint": {
+        "name": "Setpoint ACS"
+      },
+      "number_dhw_dt_start": {
+        "name": "ΔT avvio ACS"
+      },
+      "number_dhw_htr_set": {
+        "name": "Setpoint resistenza ACS"
+      },
+      "number_bus_dhw_setpoint": {
+        "name": "Setpoint ACS (BMS)"
+      },
+      "number_bus_heating_dg1_setpoint": {
+        "name": "Setpoint riscaldamento DG1 (BMS)"
+      },
+      "number_bus_heating_sg2_setpoint": {
+        "name": "Setpoint riscaldamento SG2 (BMS)"
+      },
+      "number_bus_heating_sg3_setpoint": {
+        "name": "Setpoint riscaldamento SG3 (BMS)"
+      },
+      "number_bus_heating_sg4_setpoint": {
+        "name": "Setpoint riscaldamento SG4 (BMS)"
+      },
+      "number_bus_cooling_dg1_setpoint": {
+        "name": "Setpoint raffrescamento DG1 (BMS)"
+      },
+      "number_bus_cooling_sg2_setpoint": {
+        "name": "Setpoint raffrescamento SG2 (BMS)"
+      },
+      "number_bus_cooling_sg3_setpoint": {
+        "name": "Setpoint raffrescamento SG3 (BMS)"
+      },
+      "number_bus_cooling_sg4_setpoint": {
+        "name": "Setpoint raffrescamento SG4 (BMS)"
+      },
+      "number_bus_pool_setpoint": {
+        "name": "Setpoint piscina (BMS)"
+      },
+      "number_bus_thermostat_dg1_setpoint": {
+        "name": "Setpoint termostato DG1 (BMS)"
+      },
+      "number_bus_thermostat_sg2_setpoint": {
+        "name": "Setpoint termostato SG2 (BMS)"
+      },
+      "number_bus_thermostat_sg3_setpoint": {
+        "name": "Setpoint termostato SG3 (BMS)"
+      },
+      "number_bus_thermostat_sg4_setpoint": {
+        "name": "Setpoint termostato SG4 (BMS)"
+      },
+      "number_surplus_activation_setpoint": {
+        "name": "Soglia attivazione surplus"
+      },
+      "number_consumption_limit_setpoint": {
+        "name": "Limite di consumo"
+      }
+    },
+    "switch": {
+      "switch_heating": {
+        "name": "Riscaldamento"
+      },
+      "switch_cooling": {
+        "name": "Raffrescamento"
+      },
+      "switch_dhw": {
+        "name": "ACS"
+      },
+      "switch_dg1_output": {
+        "name": "Uscita DG1"
+      },
+      "switch_sg2_output": {
+        "name": "Uscita SG2"
+      },
+      "switch_pool_output": {
+        "name": "Uscita piscina"
+      },
+      "switch_pool_device_output": {
+        "name": "Dispositivo piscina"
+      },
+      "switch_bms_onoff": {
+        "name": "Accensione da BMS"
+      },
+      "switch_surplus_control": {
+        "name": "Controllo surplus"
+      },
+      "switch_consumption_limit_control": {
+        "name": "Controllo limite di consumo"
+      }
+    },
+    "button": {
+      "button_reset_alarms": {
+        "name": "Reset allarmi"
+      }
+    },
+    "select": {
+      "select_hp_state": {
+        "name": "Stato pompa di calore (BMS)",
+        "state": {
+          "keyboard": "Tastiera",
+          "off": "Spento",
+          "on": "Acceso",
+          "emergency": "Emergenza"
+        }
+      },
+      "select_bus_program": {
+        "name": "Programma di lavoro (BMS)",
+        "state": {
+          "keyboard": "Tastiera",
+          "winter": "Inverno",
+          "summer": "Estate",
+          "mixed": "Misto"
+        }
+      },
+      "select_demand_dhw": {
+        "name": "Richiesta ACS (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "demand": "Richiesta"
+        }
+      },
+      "select_demand_pool": {
+        "name": "Richiesta piscina (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "demand": "Richiesta"
+        }
+      },
+      "select_demand_dg1": {
+        "name": "Richiesta DG1 (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "heating": "Riscaldamento",
+          "cooling": "Raffrescamento"
+        }
+      },
+      "select_demand_sg2": {
+        "name": "Richiesta SG2 (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "heating": "Riscaldamento",
+          "cooling": "Raffrescamento"
+        }
+      },
+      "select_demand_sg3": {
+        "name": "Richiesta SG3 (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "heating": "Riscaldamento",
+          "cooling": "Raffrescamento"
+        }
+      },
+      "select_demand_sg4": {
+        "name": "Richiesta SG4 (BMS)",
+        "state": {
+          "none": "Nessuna",
+          "heating": "Riscaldamento",
+          "cooling": "Raffrescamento"
+        }
+      }
+    }
+  }
+}

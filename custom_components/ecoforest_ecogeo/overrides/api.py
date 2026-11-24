@@ -4,7 +4,15 @@ from dataclasses import dataclass
 import httpx
 from pyecoforest.api import EcoforestApi
 
+from pyecoforest.exceptions import EcoforestError
+
 from custom_components.ecoforest_ecogeo.overrides.device import EcoGeoDevice
+from custom_components.ecoforest_ecogeo.overrides.api_types import DataTypes, Operations
+from custom_components.ecoforest_ecogeo.overrides.registers import (
+    EXTRA_MAPPING,
+    OPTIONAL_REQUESTS,
+    SLOW_EVERY,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,14 +23,6 @@ OP_TYPE_GET_SWITCH = 2001
 OP_TYPE_SET_SWITCH = 2011
 OP_TYPE_GET_REGISTER = 2002
 OP_TYPE_SET_REGISTER = 2012
-
-class DataTypes:
-    Register = 1
-    Coil = 2
-
-class Operations:
-    Get = {DataTypes.Coil: 2001, DataTypes.Register: 2002}
-    Set = {DataTypes.Coil: 2011, DataTypes.Register: 2012}
 
 REQUESTS = {
     DataTypes.Coil : [
@@ -244,6 +244,8 @@ MAPPING = {
     }
 }
 
+MAPPING.update(EXTRA_MAPPING)
+
 
 class EcoGeoApi(EcoforestApi):
     def __init__(
@@ -253,39 +255,80 @@ class EcoGeoApi(EcoforestApi):
         password: str
     ) -> None:
         super().__init__(host, httpx.BasicAuth(user, password))
+        self._state = {DataTypes.Coil: {}, DataTypes.Register: {}}
+        self._cycle = 0
+        self._unsupported: set[tuple[int, int]] = set()
 
     async def get(self) -> EcoGeoDevice:
-        state = {DataTypes.Coil: {}, DataTypes.Register: {}}
+        state = self._state
 
+        # required blocks: any failure is an error, as before
         for dt in [DataTypes.Coil, DataTypes.Register]:
             for request in REQUESTS[dt]:
                 state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
 
+        # optional blocks: tolerated, "slow" ones are refreshed every SLOW_EVERY polls
+        refresh_slow = self._cycle % SLOW_EVERY == 0
+        self._cycle += 1
+        for dt in [DataTypes.Coil, DataTypes.Register]:
+            for request in OPTIONAL_REQUESTS[dt]:
+                key = (dt, request["address"])
+                if key in self._unsupported:
+                    continue
+                if request["group"] == "slow" and not refresh_slow:
+                    continue
+                try:
+                    state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
+                except EcoforestError as err:
+                    _LOGGER.debug("optional block %s/%s not readable (%s), skipping it", dt, request["address"], err)
+                    self._unsupported.add(key)
+                except Exception as err:  # malformed answer from an older firmware
+                    _LOGGER.debug("optional block %s/%s failed (%s), skipping it", dt, request["address"], err)
+                    self._unsupported.add(key)
+
         device_info = {}
         for name, definition in MAPPING.items():
+            if definition["type"] == "custom":
+                continue
+
+            raw = state[definition["data_type"]].get(definition["address"])
+            if raw is None:
+                if not definition.get("optional"):
+                    raise EcoforestError(f"missing value for {name}")
+                device_info[name] = None
+                continue
+
             match definition["type"]:
                 case "int":
-                    value = self.parse_ecoforest_int(state[definition["data_type"]][definition["address"]])
+                    value = self.parse_ecoforest_int(raw)
                 case "float":
-                    value = self.parse_ecoforest_float(state[definition["data_type"]][definition["address"]])
+                    value = self.parse_ecoforest_float(raw)
                 case "boolean":
-                    value = self.parse_ecoforest_bool(state[definition["data_type"]][definition["address"]])
-                case "custom":
-                    continue
+                    value = self.parse_ecoforest_bool(raw)
+                case "bool_register":
+                    value = self.parse_ecoforest_int(raw) != 0
                 case _:
                     _LOGGER.error("unknown entity type for %s", name)
                     continue
+
+            if definition["entity_type"] == "text" and "options" in definition:
+                value = definition["options"].get(value, str(value))
 
             device_info[name] = value
 
         for name, definition in MAPPING.items():
             if definition["entity_type"] == "temperature":
-                if device_info[name] == -999.9:
+                if device_info.get(name) == -999.9:
                     device_info[name] = None
 
             if definition["type"] != "custom":
                 continue
-            device_info[name] = definition["value_fn"](device_info, state)
+            try:
+                device_info[name] = definition["value_fn"](device_info, state)
+            except (KeyError, TypeError):
+                if not definition.get("optional"):
+                    raise
+                device_info[name] = None
 
         _LOGGER.debug(device_info)
         _LOGGER.debug(state)
@@ -308,24 +351,43 @@ class EcoGeoApi(EcoforestApi):
 
         return result
 
-    async def turn_switch(self, name, on: bool | None = False) -> EcoGeoDevice:
-        if name not in MAPPING.keys():
-            raise Exception("unknown switch")
+    def _writable(self, name) -> dict:
+        definition = MAPPING.get(name)
+        if definition is None or not definition.get("writable", definition["entity_type"] in ("switch", "button") or definition.get("is_number", False)):
+            raise Exception(f"{name} is not writable")
+        return definition
 
-        await self._request(
-            data={"idOperacion": OP_TYPE_SET_SWITCH, "dir": MAPPING[name]["address"], "num": 1, int(on): int(on)}
-        )
+    async def _write(self, data_type: int, address: int, value: int) -> None:
+        if data_type == DataTypes.Coil:
+            await self._request(
+                data={"idOperacion": OP_TYPE_SET_SWITCH, "dir": address, "num": 1, int(bool(value)): int(bool(value))}
+            )
+        else:
+            raw = self.convert_raw_to_ecoforest(value)
+            await self._request(
+                data={"idOperacion": OP_TYPE_SET_REGISTER, "dir": address, "num": 1, raw: raw}
+            )
+
+    async def turn_switch(self, name, on: bool | None = False) -> EcoGeoDevice:
+        definition = self._writable(name)
+        await self._write(definition["data_type"], definition["address"], 1 if on else 0)
         return await self.get()
 
     async def set_numeric_value(self, name, value: float) -> EcoGeoDevice:
-        if name not in MAPPING.keys():
-            raise Exception("unknown register")
+        definition = self._writable(name)
+        if "min" in definition and not definition["min"] <= value <= definition["max"]:
+            raise ValueError(f"{value} out of range [{definition['min']}, {definition['max']}] for {name}")
 
-        converted_value = self.convert_to_ecoforest_int(value)
+        await self._write(DataTypes.Register, definition["address"], round(value * 10))
+        return await self.get()
 
-        await self._request(
-            data={"idOperacion": OP_TYPE_SET_REGISTER, "dir": MAPPING[name]["address"], "num": 1, converted_value: converted_value}
-        )
+    async def set_raw_value(self, name, value: int) -> EcoGeoDevice:
+        """Write an integer register as is (no /10 scaling)."""
+        definition = self._writable(name)
+        if "options" in definition and value not in definition["options"]:
+            raise ValueError(f"{value} is not a valid option for {name}")
+
+        await self._write(DataTypes.Register, definition["address"], int(value))
         return await self.get()
 
     def _parse(self, response: str) -> list[str]:
@@ -347,16 +409,15 @@ class EcoGeoApi(EcoforestApi):
         return result
 
     def convert_to_ecoforest_int(self, value):
-        value = int(value * 10)
+        return self.convert_raw_to_ecoforest(round(value * 10))
 
-        if value < 0:
-            value += 65536
-
-        return ("0000" + hex(value)[2:])[-4:]
+    def convert_raw_to_ecoforest(self, value: int) -> str:
+        """16 bit two's complement as 4 hex digits."""
+        return f"{int(value) & 0xFFFF:04x}"
 
     def parse_ecoforest_int(self, value):
         result = int(value, 16)
-        return result if result <= 32768 else result - 65536
+        return result if result < 32768 else result - 65536
 
     def parse_ecoforest_bool(self, value):
         return bool(int(value))
