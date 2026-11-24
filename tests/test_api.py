@@ -5,12 +5,12 @@ from pathlib import Path
 import pytest
 from pyecoforest.exceptions import EcoforestConnectionError
 
-from custom_components.ecoforest_ecogeo.overrides import api as api_mod
-from custom_components.ecoforest_ecogeo.overrides.api import EcoGeoApi, MAPPING
-from custom_components.ecoforest_ecogeo.overrides.api_types import DataTypes, Operations
-from custom_components.ecoforest_ecogeo.overrides.registers import OPTIONAL_REQUESTS
+from custom_components.ecoforest_ecogeo_plus.overrides import api as api_mod
+from custom_components.ecoforest_ecogeo_plus.overrides.api import EcoGeoApi, MAPPING
+from custom_components.ecoforest_ecogeo_plus.overrides.api_types import DataTypes, Operations
+from custom_components.ecoforest_ecogeo_plus.overrides.registers import OPTIONAL_REQUESTS
 
-BASE = Path(__file__).resolve().parents[1] / "custom_components" / "ecoforest_ecogeo"
+BASE = Path(__file__).resolve().parents[1] / "custom_components" / "ecoforest_ecogeo_plus"
 
 
 class FakeApi(EcoGeoApi):

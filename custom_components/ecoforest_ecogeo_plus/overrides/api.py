@@ -6,9 +6,9 @@ from pyecoforest.api import EcoforestApi
 
 from pyecoforest.exceptions import EcoforestError
 
-from custom_components.ecoforest_ecogeo.overrides.device import EcoGeoDevice
-from custom_components.ecoforest_ecogeo.overrides.api_types import DataTypes, Operations
-from custom_components.ecoforest_ecogeo.overrides.registers import (
+from .device import EcoGeoDevice
+from .api_types import DataTypes, Operations
+from .registers import (
     EXTRA_MAPPING,
     OPTIONAL_REQUESTS,
     SLOW_EVERY,

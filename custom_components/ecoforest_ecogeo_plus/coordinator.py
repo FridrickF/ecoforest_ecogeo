@@ -23,7 +23,7 @@ class EcoforestCoordinator(DataUpdateCoordinator[EcoGeoDevice]):
         super().__init__(
             hass,
             _LOGGER,
-            name="ecoforest_ecogeo",
+            name="ecoforest_ecogeo_plus",
             update_interval=POLLING_INTERVAL,
         )
         self.api = api
