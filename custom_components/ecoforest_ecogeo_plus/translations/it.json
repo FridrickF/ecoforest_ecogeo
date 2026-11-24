@@ -367,6 +367,15 @@
       },
       "pf_year": {
         "name": "PF (12 mesi)"
+      },
+      "number_dhw_setpoint": {
+        "name": "Setpoint ACS (sola lettura)"
+      },
+      "number_dhw_dt_start": {
+        "name": "ΔT avvio ACS (sola lettura)"
+      },
+      "number_dhw_htr_set": {
+        "name": "Setpoint ACS con recupero HTR (sola lettura)"
       }
     },
     "number": {
@@ -377,7 +386,7 @@
         "name": "ΔT avvio ACS"
       },
       "number_dhw_htr_set": {
-        "name": "Setpoint resistenza ACS"
+        "name": "Setpoint ACS con recupero HTR"
       },
       "number_bus_dhw_setpoint": {
         "name": "Setpoint ACS (BMS)"

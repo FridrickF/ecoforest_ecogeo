@@ -367,6 +367,15 @@
       },
       "pf_year": {
         "name": "PF (12 months)"
+      },
+      "number_dhw_setpoint": {
+        "name": "DHW set temperature (read only)"
+      },
+      "number_dhw_dt_start": {
+        "name": "DHW start ΔT (read only)"
+      },
+      "number_dhw_htr_set": {
+        "name": "DHW HTR set temperature (read only)"
       }
     },
     "number": {
@@ -374,7 +383,7 @@
         "name": "DHW set temperature"
       },
       "number_dhw_dt_start": {
-        "name": "DHW DT start temperature"
+        "name": "DHW start ΔT"
       },
       "number_dhw_htr_set": {
         "name": "DHW HTR set temperature"
