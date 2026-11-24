@@ -247,3 +247,15 @@ async def test_program_mode_is_read_only_and_translated():
         tr = json.loads((BASE / "translations" / f"{lang}.json").read_text())
         assert set(tr["entity"]["sensor"]["season_mode"]["state"]) == {"none", "winter", "summer"}
         assert set(tr["entity"]["sensor"]["program_mode"]["state"]) == {"winter", "summer", "auto", "mixed", "remote"}
+
+
+def test_stale_registry_entries():
+    from custom_components.ecoforest_ecogeo_plus.overrides.api import is_stale_registry_entry as stale
+    assert stale("sensor", "x_number_bus_pool_setpoint")          # sensor twin of a writable number
+    assert stale("sensor", "x_number_surplus_activation_setpoint")
+    assert stale("select", "x_select_program_mode")               # key no longer exists
+    assert not stale("number", "x_number_bus_pool_setpoint")
+    assert not stale("sensor", "x_number_dhw_setpoint")           # original twin is kept
+    assert not stale("sensor", "x_t_outdoor")
+    assert not stale("select", "x_select_bus_program")
+    assert not stale("sensor", "x_program_mode")

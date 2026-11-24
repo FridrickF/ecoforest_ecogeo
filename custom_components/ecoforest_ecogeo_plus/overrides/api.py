@@ -271,6 +271,21 @@ def key_of_unique_id(unique_id: str) -> str | None:
     return best
 
 
+def _domains_of(definition: dict) -> set[str]:
+    """Home Assistant domains in which the integration creates an entity for this definition."""
+    if definition.get("is_number"):
+        # the three original numbers keep a read-only sensor twin (historical behaviour)
+        return {"number"} if definition.get("writable") else {"number", "sensor"}
+    kind = definition["entity_type"]
+    return {kind} if kind in ("select", "switch", "button") else {"sensor"}
+
+
+def is_stale_registry_entry(domain: str, unique_id: str) -> bool:
+    """Registry leftovers of earlier test builds (unknown keys, nameless sensor twins, wrong domain)."""
+    key = key_of_unique_id(unique_id)
+    return key is None or domain not in _domains_of(MAPPING[key])
+
+
 class EcoGeoApi(EcoforestApi):
     def __init__(
         self,

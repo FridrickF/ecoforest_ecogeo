@@ -8,7 +8,9 @@ from pyecoforest.exceptions import EcoforestAuthenticationRequired, EcoforestCon
 
 from .const import DOMAIN
 from .coordinator import EcoforestCoordinator
-from .overrides.api import EcoGeoApi
+from homeassistant.helpers import entity_registry as er
+
+from .overrides.api import EcoGeoApi, is_stale_registry_entry
 
 PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.NUMBER, Platform.BUTTON, Platform.SELECT]
 
@@ -37,9 +39,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
 
+    _remove_stale_entities(hass, entry)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+def _remove_stale_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Drop registry entries that no code creates any more (e.g. nameless sensor twins of numbers)."""
+    registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if is_stale_registry_entry(entity.domain, entity.unique_id):
+            _LOGGER.info("Removing stale entity %s", entity.entity_id)
+            registry.async_remove(entity.entity_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
