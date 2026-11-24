@@ -81,46 +81,46 @@
         "name": "Temperatura ACS"
       },
       "t_cooling": {
-        "name": "Temperatura accumulo freddo"
+        "name": "Temperatura accumulo inerziale raffrescamento"
       },
       "t_heating": {
-        "name": "Temperatura accumulo caldo"
+        "name": "Temperatura accumulo inerziale riscaldamento"
       },
       "t_dg1_h": {
-        "name": "Temperatura mandata DG1 (riscaldamento)"
+        "name": "Temperatura mandata produzione"
       },
       "t_dg1_c": {
-        "name": "Temperatura DG1 (raffrescamento)"
+        "name": "Temperatura reale raffrescamento DG1"
       },
       "t_sg2": {
-        "name": "Temperatura mandata SG2"
+        "name": "Temperatura di mandata SG2"
       },
       "t_sg3": {
-        "name": "Temperatura mandata SG3"
+        "name": "Temperatura di mandata SG3"
       },
       "t_sg4": {
-        "name": "Temperatura mandata SG4"
+        "name": "Temperatura di mandata SG4"
       },
       "power_heating": {
-        "name": "Potenza termica resa"
+        "name": "Potenza di condensazione"
       },
       "power_cooling": {
-        "name": "Potenza di evaporazione (calore prelevato dalla sorgente)"
+        "name": "Potenza di evaporazione"
       },
       "power_electric": {
-        "name": "Potenza elettrica"
+        "name": "Potenza elettrica assorbita"
       },
       "power_output": {
         "name": "Potenza utile resa"
       },
       "t_brine_in": {
-        "name": "Temperatura ritorno geotermia"
+        "name": "Temperatura ritorno sonde"
       },
       "t_brine_out": {
-        "name": "Temperatura mandata geotermia"
+        "name": "Temperatura mandata sonde"
       },
       "p_brine": {
-        "name": "Pressione circuito geotermia"
+        "name": "Pressione circuito sonde"
       },
       "p_output": {
         "name": "Pressione circuito produzione"
@@ -180,7 +180,7 @@
         "name": "Temperatura termostato BUS SG4"
       },
       "compressor_rpm": {
-        "name": "Giri compressore"
+        "name": "Giri compressore (RPM)"
       },
       "t_scroll": {
         "name": "Temperatura scroll"
@@ -189,16 +189,16 @@
         "name": "Temperatura inverter"
       },
       "working_hours_l": {
-        "name": "Ore di funzionamento (parte bassa)"
+        "name": "Ore di funzionamento L"
       },
       "working_hours_h": {
-        "name": "Ore di funzionamento (parte alta)"
+        "name": "Ore di funzionamento H"
       },
       "starts_counter": {
-        "name": "Avviamenti compressore"
+        "name": "Contatore avviamenti"
       },
       "starts_counter_x1000": {
-        "name": "Avviamenti compressore x1000"
+        "name": "Contatore avviamenti x1000"
       },
       "software_version_1": {
         "name": "Versione software 1"
@@ -479,19 +479,19 @@
         "name": "Raffrescamento"
       },
       "switch_dhw": {
-        "name": "ACS"
+        "name": "Attivazione ACS (utente)"
       },
       "switch_dg1_output": {
-        "name": "Uscita DG1"
+        "name": "Attivazione DG1 (DO6)"
       },
       "switch_sg2_output": {
-        "name": "Uscita SG2"
+        "name": "Attivazione SG2 (DO7)"
       },
       "switch_pool_output": {
-        "name": "Uscita piscina"
+        "name": "Attivazione piscina"
       },
       "switch_pool_device_output": {
-        "name": "Dispositivo piscina"
+        "name": "Attivazione dispositivo piscina (DO5)"
       },
       "switch_bms_onoff": {
         "name": "Accensione da BMS"

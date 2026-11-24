@@ -81,49 +81,49 @@
         "name": "DHW temperature"
       },
       "t_cooling": {
-        "name": "Cooling Tank temperature"
+        "name": "Cooling buffer tank temperature"
       },
       "t_heating": {
-        "name": "Heating Tank temperature"
+        "name": "Heating buffer tank temperature"
       },
       "t_dg1_h": {
-        "name": "DG1 Heating temperature"
+        "name": "Production temperature Out"
       },
       "t_dg1_c": {
-        "name": "DG1 Cooling temperature"
+        "name": "Cooling DG1 real temperature"
       },
       "t_sg2": {
-        "name": "SG2 temperature"
+        "name": "Supply temperature SG2"
       },
       "t_sg3": {
-        "name": "SG3 temperature"
+        "name": "Supply temperature SG3"
       },
       "t_sg4": {
-        "name": "SG4 temperature"
+        "name": "Supply temperature SG4"
       },
       "power_heating": {
-        "name": "Heating power"
+        "name": "Condensation capacity"
       },
       "power_cooling": {
-        "name": "Evaporation power (heat taken from source)"
+        "name": "Evaporation capacity"
       },
       "power_electric": {
-        "name": "Energy consumption"
+        "name": "Power consumption"
       },
       "power_output": {
         "name": "Useful output power"
       },
       "t_brine_in": {
-        "name": "Brine input temperature"
+        "name": "Brine temperature In"
       },
       "t_brine_out": {
-        "name": "Brine output temperature"
+        "name": "Brine temperature Out"
       },
       "p_brine": {
-        "name": "Brine pressure"
+        "name": "Brine circuit pressure"
       },
       "p_output": {
-        "name": "Output pressure"
+        "name": "Production circuit pressure"
       },
       "cop": {
         "name": "COP"
@@ -180,7 +180,7 @@
         "name": "BUS thermostat temperature SG4"
       },
       "compressor_rpm": {
-        "name": "Compressor speed"
+        "name": "Compressor RPM"
       },
       "t_scroll": {
         "name": "Scroll temperature"
@@ -189,16 +189,16 @@
         "name": "Inverter temperature"
       },
       "working_hours_l": {
-        "name": "Working hours (low word)"
+        "name": "Working hours L"
       },
       "working_hours_h": {
-        "name": "Working hours (high word)"
+        "name": "Working hours H"
       },
       "starts_counter": {
-        "name": "Compressor starts"
+        "name": "Starts counter"
       },
       "starts_counter_x1000": {
-        "name": "Compressor starts x1000"
+        "name": "Starts counter x1000"
       },
       "software_version_1": {
         "name": "Software version 1"
@@ -473,25 +473,25 @@
     },
     "switch": {
       "switch_heating": {
-        "name": "Heating enabled"
+        "name": "Heating"
       },
       "switch_cooling": {
-        "name": "Cooling enabled"
+        "name": "Cooling"
       },
       "switch_dhw": {
-        "name": "DHW enabled"
+        "name": "User activation DHW"
       },
       "switch_dg1_output": {
-        "name": "DG1 Pump"
+        "name": "DG1 activation (DO6)"
       },
       "switch_sg2_output": {
-        "name": "SG2 Pump"
+        "name": "SG2 activation (DO7)"
       },
       "switch_pool_output": {
-        "name": "Pool"
+        "name": "Pool activation"
       },
       "switch_pool_device_output": {
-        "name": "Pool Device"
+        "name": "Pool device activation (DO5)"
       },
       "switch_bms_onoff": {
         "name": "BMS on/off control"
@@ -505,7 +505,7 @@
     },
     "button": {
       "button_reset_alarms": {
-        "name": "Reset Alarms"
+        "name": "Reset alarm"
       }
     },
     "select": {
