@@ -399,12 +399,6 @@
       },
       "number_bus_thermostat_sg4_setpoint": {
         "name": "BMS thermostat SG4 setpoint"
-      },
-      "number_surplus_activation_setpoint": {
-        "name": "Surplus activation setpoint"
-      },
-      "number_consumption_limit_setpoint": {
-        "name": "Consumption limit setpoint"
       }
     },
     "switch": {

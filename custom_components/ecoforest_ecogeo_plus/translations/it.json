@@ -399,12 +399,6 @@
       },
       "number_bus_thermostat_sg4_setpoint": {
         "name": "Setpoint termostato SG4 (BMS)"
-      },
-      "number_surplus_activation_setpoint": {
-        "name": "Soglia attivazione surplus"
-      },
-      "number_consumption_limit_setpoint": {
-        "name": "Limite di consumo"
       }
     },
     "switch": {

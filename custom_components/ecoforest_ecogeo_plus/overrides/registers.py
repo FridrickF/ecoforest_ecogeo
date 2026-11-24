@@ -36,7 +36,6 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 134, "length": 10, "group": "fast"},   # BUS setpoints
         {"address": 176, "length": 4, "group": "fast"},    # BUS thermostat setpoints
         {"address": 7002, "length": 2, "group": "fast"},   # surplus / consumption limit enable
-        {"address": 2000, "length": 2, "group": "fast"},   # surplus / consumption limit setpoints
         {"address": 94, "length": 1, "group": "slow"},
         {"address": 132, "length": 2, "group": "slow"},
         {"address": 186, "length": 8, "group": "slow"},
@@ -186,6 +185,8 @@ def _number(address, entity_type, lo, hi, step=0.1, **extra):
 
 
 # ---- ANALOG read/write (BUS setpoints). Remember: demand AND setpoint must be sent. ----
+# 2000/2001 (surplus setpoints in the 2023 guide) are deliberately NOT mapped: on the HP24 list
+# the same addresses are year/month, so a write could hit something else on older firmware.
 EXTRA_MAPPING.update({
     "number_bus_dhw_setpoint": _number(134, "temperature", 0, 65),                # inferred
     "number_bus_heating_dg1_setpoint": _number(135, "temperature", 20, 55),       # inferred
@@ -201,8 +202,6 @@ EXTRA_MAPPING.update({
     "number_bus_thermostat_sg2_setpoint": _number(177, "temperature", 15, 30),    # inferred
     "number_bus_thermostat_sg3_setpoint": _number(178, "temperature", 15, 30),    # inferred
     "number_bus_thermostat_sg4_setpoint": _number(179, "temperature", 15, 30),    # inferred
-    "number_surplus_activation_setpoint": _number(2000, "power_kw", 0, 30),       # inferred
-    "number_consumption_limit_setpoint": _number(2001, "power_kw", 0, 30),        # inferred
 })
 
 # ---- INTEGER monthly energies 5144-5179 (unit not specified by the guide: Wh/kWh/MWh) ----
