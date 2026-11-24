@@ -102,10 +102,10 @@
         "name": "Temperatura di mandata SG4"
       },
       "power_heating": {
-        "name": "Potenza di condensazione"
+        "name": "Potenza di riscaldamento (condensazione)"
       },
       "power_cooling": {
-        "name": "Potenza di evaporazione"
+        "name": "Potenza di raffrescamento (evaporazione)"
       },
       "power_electric": {
         "name": "Potenza elettrica assorbita"
@@ -396,46 +396,46 @@
         "name": "Setpoint ACS con recupero HTR"
       },
       "number_bus_dhw_setpoint": {
-        "name": "Setpoint ACS (BMS)"
+        "name": "Setpoint ACS (BUS)"
       },
       "number_bus_heating_dg1_setpoint": {
-        "name": "Setpoint riscaldamento DG1 (BMS)"
+        "name": "Setpoint riscaldamento DG1 (BUS)"
       },
       "number_bus_heating_sg2_setpoint": {
-        "name": "Setpoint riscaldamento SG2 (BMS)"
+        "name": "Setpoint riscaldamento SG2 (BUS)"
       },
       "number_bus_heating_sg3_setpoint": {
-        "name": "Setpoint riscaldamento SG3 (BMS)"
+        "name": "Setpoint riscaldamento SG3 (BUS)"
       },
       "number_bus_heating_sg4_setpoint": {
-        "name": "Setpoint riscaldamento SG4 (BMS)"
+        "name": "Setpoint riscaldamento SG4 (BUS)"
       },
       "number_bus_cooling_dg1_setpoint": {
-        "name": "Setpoint raffrescamento DG1 (BMS)"
+        "name": "Setpoint raffrescamento DG1 (BUS)"
       },
       "number_bus_cooling_sg2_setpoint": {
-        "name": "Setpoint raffrescamento SG2 (BMS)"
+        "name": "Setpoint raffrescamento SG2 (BUS)"
       },
       "number_bus_cooling_sg3_setpoint": {
-        "name": "Setpoint raffrescamento SG3 (BMS)"
+        "name": "Setpoint raffrescamento SG3 (BUS)"
       },
       "number_bus_cooling_sg4_setpoint": {
-        "name": "Setpoint raffrescamento SG4 (BMS)"
+        "name": "Setpoint raffrescamento SG4 (BUS)"
       },
       "number_bus_pool_setpoint": {
-        "name": "Setpoint piscina (BMS)"
+        "name": "Setpoint piscina (BUS)"
       },
       "number_bus_thermostat_dg1_setpoint": {
-        "name": "Setpoint termostato DG1 (BMS)"
+        "name": "Setpoint termostato DG1 (BUS)"
       },
       "number_bus_thermostat_sg2_setpoint": {
-        "name": "Setpoint termostato SG2 (BMS)"
+        "name": "Setpoint termostato SG2 (BUS)"
       },
       "number_bus_thermostat_sg3_setpoint": {
-        "name": "Setpoint termostato SG3 (BMS)"
+        "name": "Setpoint termostato SG3 (BUS)"
       },
       "number_bus_thermostat_sg4_setpoint": {
-        "name": "Setpoint termostato SG4 (BMS)"
+        "name": "Setpoint termostato SG4 (BUS)"
       },
       "number_surplus_activation_setpoint": {
         "name": "Soglia attivazione surplus"
@@ -494,7 +494,7 @@
         "name": "Attivazione dispositivo piscina (DO5)"
       },
       "switch_bms_onoff": {
-        "name": "Accensione da BMS"
+        "name": "Accensione da BUS"
       },
       "switch_surplus_control": {
         "name": "Controllo surplus"
@@ -510,7 +510,7 @@
     },
     "select": {
       "select_hp_state": {
-        "name": "Stato pompa di calore (BMS)",
+        "name": "Stato pompa di calore (BUS)",
         "state": {
           "keyboard": "Tastiera",
           "off": "Spento",
@@ -519,7 +519,7 @@
         }
       },
       "select_bus_program": {
-        "name": "Programma di lavoro (BMS)",
+        "name": "Programma di lavoro (BUS)",
         "state": {
           "keyboard": "Tastiera",
           "winter": "Inverno",
@@ -528,21 +528,21 @@
         }
       },
       "select_demand_dhw": {
-        "name": "Richiesta ACS (BMS)",
+        "name": "Richiesta ACS (BUS)",
         "state": {
           "none": "Nessuna",
           "demand": "Richiesta"
         }
       },
       "select_demand_pool": {
-        "name": "Richiesta piscina (BMS)",
+        "name": "Richiesta piscina (BUS)",
         "state": {
           "none": "Nessuna",
           "demand": "Richiesta"
         }
       },
       "select_demand_dg1": {
-        "name": "Richiesta DG1 (BMS)",
+        "name": "Richiesta DG1 (BUS)",
         "state": {
           "none": "Nessuna",
           "heating": "Riscaldamento",
@@ -550,7 +550,7 @@
         }
       },
       "select_demand_sg2": {
-        "name": "Richiesta SG2 (BMS)",
+        "name": "Richiesta SG2 (BUS)",
         "state": {
           "none": "Nessuna",
           "heating": "Riscaldamento",
@@ -558,7 +558,7 @@
         }
       },
       "select_demand_sg3": {
-        "name": "Richiesta SG3 (BMS)",
+        "name": "Richiesta SG3 (BUS)",
         "state": {
           "none": "Nessuna",
           "heating": "Riscaldamento",
@@ -566,7 +566,7 @@
         }
       },
       "select_demand_sg4": {
-        "name": "Richiesta SG4 (BMS)",
+        "name": "Richiesta SG4 (BUS)",
         "state": {
           "none": "Nessuna",
           "heating": "Riscaldamento",

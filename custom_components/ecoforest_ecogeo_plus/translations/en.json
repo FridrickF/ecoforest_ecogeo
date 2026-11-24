@@ -102,10 +102,10 @@
         "name": "Supply temperature SG4"
       },
       "power_heating": {
-        "name": "Condensation capacity"
+        "name": "Heating power (condensation)"
       },
       "power_cooling": {
-        "name": "Evaporation capacity"
+        "name": "Cooling power (evaporation)"
       },
       "power_electric": {
         "name": "Power consumption"
@@ -396,46 +396,46 @@
         "name": "DHW HTR set temperature"
       },
       "number_bus_dhw_setpoint": {
-        "name": "BMS DHW setpoint"
+        "name": "DHW setpoint by BUS"
       },
       "number_bus_heating_dg1_setpoint": {
-        "name": "BMS heating DG1 setpoint"
+        "name": "BUS heating DG1 setpoint"
       },
       "number_bus_heating_sg2_setpoint": {
-        "name": "BMS heating SG2 setpoint"
+        "name": "BUS heating SG2 setpoint"
       },
       "number_bus_heating_sg3_setpoint": {
-        "name": "BMS heating SG3 setpoint"
+        "name": "BUS heating SG3 setpoint"
       },
       "number_bus_heating_sg4_setpoint": {
-        "name": "BMS heating SG4 setpoint"
+        "name": "BUS heating SG4 setpoint"
       },
       "number_bus_cooling_dg1_setpoint": {
-        "name": "BMS cooling DG1 setpoint"
+        "name": "BUS cooling DG1 setpoint"
       },
       "number_bus_cooling_sg2_setpoint": {
-        "name": "BMS cooling SG2 setpoint"
+        "name": "BUS cooling SG2 setpoint"
       },
       "number_bus_cooling_sg3_setpoint": {
-        "name": "BMS cooling SG3 setpoint"
+        "name": "BUS cooling SG3 setpoint"
       },
       "number_bus_cooling_sg4_setpoint": {
-        "name": "BMS cooling SG4 setpoint"
+        "name": "BUS cooling SG4 setpoint"
       },
       "number_bus_pool_setpoint": {
-        "name": "BMS pool setpoint"
+        "name": "BUS pool setpoint"
       },
       "number_bus_thermostat_dg1_setpoint": {
-        "name": "BMS thermostat DG1 setpoint"
+        "name": "BUS thermostat setpoint DG1"
       },
       "number_bus_thermostat_sg2_setpoint": {
-        "name": "BMS thermostat SG2 setpoint"
+        "name": "BUS thermostat setpoint SG2"
       },
       "number_bus_thermostat_sg3_setpoint": {
-        "name": "BMS thermostat SG3 setpoint"
+        "name": "BUS thermostat setpoint SG3"
       },
       "number_bus_thermostat_sg4_setpoint": {
-        "name": "BMS thermostat SG4 setpoint"
+        "name": "BUS thermostat setpoint SG4"
       },
       "number_surplus_activation_setpoint": {
         "name": "Surplus activation setpoint"
@@ -494,7 +494,7 @@
         "name": "Pool device activation (DO5)"
       },
       "switch_bms_onoff": {
-        "name": "BMS on/off control"
+        "name": "On/off control by BUS"
       },
       "switch_surplus_control": {
         "name": "Surplus control"
@@ -510,7 +510,7 @@
     },
     "select": {
       "select_hp_state": {
-        "name": "BMS heat pump state",
+        "name": "Heat pump state (BUS)",
         "state": {
           "keyboard": "Keyboard",
           "off": "Off",
@@ -519,7 +519,7 @@
         }
       },
       "select_bus_program": {
-        "name": "BMS operating program",
+        "name": "Working program by BUS",
         "state": {
           "keyboard": "Keyboard",
           "winter": "Winter",
@@ -528,21 +528,21 @@
         }
       },
       "select_demand_dhw": {
-        "name": "BMS DHW demand",
+        "name": "BUS DHW demand",
         "state": {
           "none": "None",
           "demand": "Demand"
         }
       },
       "select_demand_pool": {
-        "name": "BMS pool demand",
+        "name": "BUS pool demand",
         "state": {
           "none": "None",
           "demand": "Demand"
         }
       },
       "select_demand_dg1": {
-        "name": "BMS DG1 demand",
+        "name": "BUS DG1 demand",
         "state": {
           "none": "None",
           "heating": "Heating",
@@ -550,7 +550,7 @@
         }
       },
       "select_demand_sg2": {
-        "name": "BMS SG2 demand",
+        "name": "BUS SG2 demand",
         "state": {
           "none": "None",
           "heating": "Heating",
@@ -558,7 +558,7 @@
         }
       },
       "select_demand_sg3": {
-        "name": "BMS SG3 demand",
+        "name": "BUS SG3 demand",
         "state": {
           "none": "None",
           "heating": "Heating",
@@ -566,7 +566,7 @@
         }
       },
       "select_demand_sg4": {
-        "name": "BMS SG4 demand",
+        "name": "BUS SG4 demand",
         "state": {
           "none": "None",
           "heating": "Heating",
