@@ -210,3 +210,13 @@ def test_key_of_unique_id():
     assert key_of_unique_id("alias_t_dhw") == "t_dhw"
     assert key_of_unique_id("alias_t_dhw_start") == "t_dhw_start"
     assert key_of_unique_id("nonsense") is None
+
+
+def test_writable_entities_are_not_also_created_as_sensors():
+    """Number/switch/select definitions with entity_category config cannot be sensors (HA refuses)."""
+    from custom_components.ecoforest_ecogeo_plus import sensor  # noqa: F401  (imports with real HA)
+    import inspect
+    assert 'not definition.get("writable")' in inspect.getsource(sensor.async_setup_entry)
+    # the original three numbers keep their historical read-only sensor twin
+    for key in ("number_dhw_setpoint", "number_dhw_dt_start", "number_dhw_htr_set"):
+        assert not MAPPING[key].get("writable")
