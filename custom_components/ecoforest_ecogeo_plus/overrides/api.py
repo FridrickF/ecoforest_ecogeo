@@ -125,8 +125,6 @@ MAPPING = {
         "type": "custom",
         "entity_type": "power",
         "reads": (DataTypes.Coil, (127, 128)),
-        # useful output: winter/unknown -> heat delivered (condensation); summer -> PF x electric power
-        # (PF = EER, or COP+EER while heat recovery HTR is working), falling back to evaporation
         "value_fn": lambda data, raw: _useful_power(data, raw)
     },
     "t_brine_in": {
@@ -255,12 +253,20 @@ MAPPING.update(EXTRA_MAPPING)
 
 
 def _useful_power(data, raw):
-    if _season_of(raw) != "summer":
-        return data["power_heating"]
+    """Thermal power delivered to the building.
+
+    Base value: condensation capacity in winter/unknown, evaporation capacity in summer. With HTR heat
+    recovery the unit also delivers the recovered heat (DHW) or both cooling and heating at once; the
+    manufacturer's PF is "thermal power delivered / electric power" and includes it, so when PF x electric
+    power clearly exceeds the base value (3 %, PF has 0.1 resolution) that is used instead.
+    """
+    base = data["power_cooling"] if _season_of(raw) == "summer" else data["power_heating"]
     pf, p_el = data.get("pf"), data.get("power_electric")
     if pf and p_el:
-        return round(pf * p_el)
-    return data["power_cooling"]
+        total = round(pf * p_el)
+        if total > base * 1.03:
+            return total
+    return base
 
 
 def _season_of(raw) -> str | None:

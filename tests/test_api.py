@@ -230,9 +230,18 @@ async def test_power_output_follows_season_and_labels():
     assert winter.state["power_output"] == 4365  # not 8165 anymore
     summer = await FakeApi(registers=base, coils={127: "1"}).get()
     assert summer.state["power_output"] == 3800
-    # summer: PF x electric power (HTR recovery: PF = COP + EER); 8.0 x 480 W
-    htr = await FakeApi(registers={**base, 5082: f"{480:04x}", 31: f"{80:04x}"}, coils={127: "1"}).get()
-    assert htr.state["power_output"] == 3840
+    # summer with HTR recovery: PF 12.0 x 480 W = 5760 W > evaporation 3800 W
+    htr = await FakeApi(registers={**base, 5082: f"{480:04x}", 31: f"{120:04x}"}, coils={127: "1"}).get()
+    assert htr.state["power_output"] == 5760
+    # summer without recovery: PF ~ EER, within 3 % -> exact evaporation value
+    nohtr = await FakeApi(registers={**base, 5082: f"{480:04x}", 31: f"{80:04x}"}, coils={127: "1"}).get()
+    assert nohtr.state["power_output"] == 3800
+    # winter with recovery (PF clearly above COP): 9.0 x 480 = 4320 > base 3000
+    w_htr = await FakeApi(registers={**base, 5083: f"{3000:04x}", 5082: f"{480:04x}", 31: f"{90:04x}"}, coils={128: "1"}).get()
+    assert w_htr.state["power_output"] == 4320
+    # winter without recovery: PF x P within 3 % of the exact value -> keep the exact measurement
+    w = await FakeApi(registers={**base, 5083: f"{4365:04x}", 5082: f"{480:04x}", 31: f"{91:04x}"}, coils={128: "1"}).get()
+    assert w.state["power_output"] == 4365
     unknown = await FakeApi(registers=base).get()
     assert unknown.state["power_output"] == 4365
     assert winter.state["season_mode"] == "winter"
@@ -274,3 +283,21 @@ async def test_compressor_limits_and_surplus_numbers():
     assert api.writes[-1] == {"idOperacion": 2012, "dir": 175, "num": 1, "01c2": "01c2"}
     with pytest.raises(ValueError):
         await api.set_numeric_value("number_night_compressor_limit", 10)
+
+
+@pytest.mark.asyncio
+async def test_monthly_energy_and_year_totals():
+    # November (month 11): heating 370, cooling 0, electric 61 kWh; other months heating 100
+    r = {**regs(), 5096: f"{11:04x}"}
+    for m in range(12):
+        r[5144 + m] = f"{(370 if m == 10 else 100):04x}"
+        r[5156 + m] = f"{0:04x}"
+        r[5168 + m] = f"{(61 if m == 10 else 20):04x}"
+    dev = await FakeApi(registers=r).get()
+    assert dev.state["energy_condensation_11"] == 370
+    assert dev.state["energy_heating_month"] == 370
+    assert dev.state["energy_cooling_month"] == 0
+    assert dev.state["energy_electric_month"] == 61
+    assert dev.state["energy_heating_year"] == 1100 + 370
+    assert dev.state["energy_electric_year"] == 61 + 220
+    assert dev.state["pf_year"] == round(1470 / 281, 1)

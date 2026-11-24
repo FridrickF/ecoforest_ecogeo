@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription, SensorStateClass
-from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, EntityCategory, UnitOfTemperature, UnitOfPower, UnitOfPressure
+from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, EntityCategory, UnitOfEnergy, UnitOfTemperature, UnitOfPower, UnitOfPressure
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityDescription, generate_entity_id
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -21,6 +21,8 @@ SENSOR_TYPES = {
     "temperature": {"class": SensorDeviceClass.TEMPERATURE, "unit": UnitOfTemperature.CELSIUS, "state_class": SensorStateClass.MEASUREMENT},
     "pressure": {"class": SensorDeviceClass.PRESSURE, "unit": UnitOfPressure.BAR, "state_class": SensorStateClass.MEASUREMENT},
     "power": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.WATT, "state_class": SensorStateClass.MEASUREMENT},
+    "energy": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR},
+    "energy_total": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR, "state_class": SensorStateClass.TOTAL_INCREASING},
     "power_kw": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.KILO_WATT, "state_class": SensorStateClass.MEASUREMENT},
     "percentage": {"unit": PERCENTAGE, "state_class": SensorStateClass.MEASUREMENT},
     "rpm": {"unit": REVOLUTIONS_PER_MINUTE, "state_class": SensorStateClass.MEASUREMENT},

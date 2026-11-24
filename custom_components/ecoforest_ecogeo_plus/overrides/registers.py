@@ -1,12 +1,11 @@
 """Extra registers of the ecoGEO+ *domestic* BMS/Modbus table (guide 2023, v02, pages 8-10).
 
 Everything defined here is additive: the original entities stay in ``api.MAPPING``
-untouched (same keys, same unique ids). The extra entities are disabled by default
-in the entity registry, so nothing new shows up until the user enables it.
+untouched (same keys, same unique ids). 
 
 Entry format (same shape as ``api.MAPPING``) plus:
 
-* ``enabled_default``: ``False`` -> entity is created disabled
+* ``enabled_default``: ``False`` -> entity is created disabled (none at the moment)
 * ``group``: ``"fast"`` (read every poll) or ``"slow"`` (read every SLOW_EVERY polls)
 * ``writable``: entity may write to the device (numbers / selects / switches)
 * ``options``: for selects/text sensors, ``{raw value: option key}``
@@ -63,7 +62,7 @@ DEMAND_HEAT_COOL = {0: "none", 1: "heating", 2: "cooling"}
 MONTHS = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 
 
-def _ro(address, entity_type, *, type="float", slow=True, enabled=False, data_type=R, **extra):
+def _ro(address, entity_type, *, type="float", slow=True, enabled=True, data_type=R, **extra):
     d = {
         "data_type": data_type,
         "type": type,
@@ -126,7 +125,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "entity_type": "text",
         "optional": True,
         "group": "slow",
-        "enabled_default": False,
+        "enabled_default": True,
         "diagnostic": True,
         "reads": (R, tuple(range(5093, 5098))),
         "value_fn": lambda data, raw: _clock(raw),
@@ -134,42 +133,42 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     # ---- BMS remote control (all disabled by default, need "BMS remote control") -----
     "switch_bms_onoff": {
         "data_type": C, "type": "boolean", "address": 53, "entity_type": "switch",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
     },
     "switch_surplus_control": {
         "data_type": R, "type": "bool_register", "address": 7002, "entity_type": "switch",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
     },
     "switch_consumption_limit_control": {
         "data_type": R, "type": "bool_register", "address": 7003, "entity_type": "switch",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
     },
     "select_hp_state": {
         "data_type": R, "type": "int", "address": 5220, "entity_type": "select",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
         "options": HP_STATE,
     },
     # read only: what the keyboard/monitor program is set to (5024, inferred, not in the official guide)
     "program_mode": _ro(5024, "text", type="int", slow=False, diagnostic=True, options=PROGRAM_MODE),
     "select_bus_program": {
         "data_type": R, "type": "int", "address": 5221, "entity_type": "select",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
         "options": BUS_PROGRAM,
     },
     "select_demand_dhw": {
         "data_type": R, "type": "int", "address": 5222, "entity_type": "select",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
         "options": DEMAND_ONOFF,
     },
     "select_demand_pool": {
         "data_type": R, "type": "int", "address": 5223, "entity_type": "select",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
         "options": DEMAND_ONOFF,
     },
     **{
         f"select_demand_{z.lower()}": {
             "data_type": R, "type": "int", "address": 5224 + i, "entity_type": "select",
-            "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+            "optional": True, "group": "fast", "enabled_default": True, "writable": True,
             "options": DEMAND_HEAT_COOL,
         }
         for i, z in enumerate(["dg1", "sg2", "sg3", "sg4"])
@@ -181,7 +180,7 @@ def _number(address, entity_type, lo, hi, step=0.1, **extra):
     d = {
         "data_type": R, "type": "float", "address": address, "entity_type": entity_type,
         "is_number": True, "min": lo, "max": hi, "step": step,
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "optional": True, "group": "fast", "enabled_default": True, "writable": True,
     }
     d.update(extra)
     return d
@@ -223,7 +222,7 @@ EXTRA_MAPPING.update({
 for _i, _m in enumerate(MONTHS):
     for _name, _base in (("condensation", 5144), ("evaporation", 5156), ("electric", 5168)):
         EXTRA_MAPPING[f"energy_{_name}_{_m}"] = _ro(
-            _base + _i, "raw", type="int", diagnostic=True
+            _base + _i, "energy", type="int", diagnostic=True
         )
 
 
@@ -256,3 +255,50 @@ def addresses_of(definition: dict) -> tuple[int, frozenset[int]] | None:
         dt, addrs = definition["reads"]
         return dt, frozenset(addrs)
     return None
+
+
+# ---- derived from the monthly counters (5144-5179, kWh, current month from the device clock 5096) ----
+_COUNTER_BASE = {"heating": 5144, "cooling": 5156, "electric": 5168}  # condensation / evaporation / electric
+
+
+def _counter(raw, kind, month):
+    return int(raw[R][_COUNTER_BASE[kind] + month - 1], 16)
+
+
+def _month(raw):
+    month = int(raw[R][5096], 16)
+    return month if 1 <= month <= 12 else None
+
+
+def _current(kind):
+    def fn(data, raw):
+        m = _month(raw)
+        return None if m is None else _counter(raw, kind, m)
+    return fn
+
+
+def _year(kind):
+    def fn(data, raw):
+        return sum(_counter(raw, kind, m) for m in range(1, 13))
+    return fn
+
+
+def _pf_year(data, raw):
+    heat, cool, el = (_year(k)(data, raw) for k in ("heating", "cooling", "electric"))
+    return round((heat + cool) / el, 1) if el else None
+
+
+_READS = (R, (5096, *range(5144, 5180)))
+for _kind in _COUNTER_BASE:
+    EXTRA_MAPPING[f"energy_{_kind}_month"] = {
+        "data_type": R, "type": "custom", "entity_type": "energy_total", "optional": True,
+        "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _current(_kind),
+    }
+    EXTRA_MAPPING[f"energy_{_kind}_year"] = {
+        "data_type": R, "type": "custom", "entity_type": "energy_total", "optional": True,
+        "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _year(_kind),
+    }
+EXTRA_MAPPING["pf_year"] = {
+    "data_type": R, "type": "custom", "entity_type": "measurement", "optional": True,
+    "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _pf_year,
+}
