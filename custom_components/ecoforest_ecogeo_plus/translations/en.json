@@ -399,6 +399,39 @@
       },
       "number_bus_thermostat_sg4_setpoint": {
         "name": "BMS thermostat SG4 setpoint"
+      },
+      "number_surplus_activation_setpoint": {
+        "name": "Surplus activation setpoint"
+      },
+      "number_consumption_limit_setpoint": {
+        "name": "Consumption limit setpoint"
+      },
+      "number_night_compressor_limit": {
+        "name": "Night time compressor limit"
+      },
+      "number_compressor_dhw_min": {
+        "name": "Compressor minimum capacity DHW"
+      },
+      "number_compressor_dhw_max": {
+        "name": "Compressor maximum capacity DHW"
+      },
+      "number_compressor_heating_min": {
+        "name": "Compressor minimum capacity heating"
+      },
+      "number_compressor_heating_max": {
+        "name": "Compressor maximum capacity heating"
+      },
+      "number_compressor_cooling_min": {
+        "name": "Compressor minimum capacity cooling"
+      },
+      "number_compressor_cooling_max": {
+        "name": "Compressor maximum capacity cooling"
+      },
+      "number_compressor_pool_min": {
+        "name": "Compressor minimum capacity pool"
+      },
+      "number_compressor_pool_max": {
+        "name": "Compressor maximum capacity pool"
       }
     },
     "switch": {

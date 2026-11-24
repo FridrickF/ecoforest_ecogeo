@@ -125,8 +125,9 @@ MAPPING = {
         "type": "custom",
         "entity_type": "power",
         "reads": (DataTypes.Coil, (127, 128)),
-        # useful output: heat delivered in winter/unknown, evaporation (cold delivered) in summer
-        "value_fn": lambda data, raw: data["power_cooling"] if _season_of(raw) == "summer" else data["power_heating"]
+        # useful output: winter/unknown -> heat delivered (condensation); summer -> PF x electric power
+        # (PF = EER, or COP+EER while heat recovery HTR is working), falling back to evaporation
+        "value_fn": lambda data, raw: _useful_power(data, raw)
     },
     "t_brine_in": {
         "data_type": DataTypes.Register,
@@ -251,6 +252,15 @@ MAPPING = {
 }
 
 MAPPING.update(EXTRA_MAPPING)
+
+
+def _useful_power(data, raw):
+    if _season_of(raw) != "summer":
+        return data["power_heating"]
+    pf, p_el = data.get("pf"), data.get("power_electric")
+    if pf and p_el:
+        return round(pf * p_el)
+    return data["power_cooling"]
 
 
 def _season_of(raw) -> str | None:

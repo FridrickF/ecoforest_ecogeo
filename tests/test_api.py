@@ -230,6 +230,9 @@ async def test_power_output_follows_season_and_labels():
     assert winter.state["power_output"] == 4365  # not 8165 anymore
     summer = await FakeApi(registers=base, coils={127: "1"}).get()
     assert summer.state["power_output"] == 3800
+    # summer: PF x electric power (HTR recovery: PF = COP + EER); 8.0 x 480 W
+    htr = await FakeApi(registers={**base, 5082: f"{480:04x}", 31: f"{80:04x}"}, coils={127: "1"}).get()
+    assert htr.state["power_output"] == 3840
     unknown = await FakeApi(registers=base).get()
     assert unknown.state["power_output"] == 4365
     assert winter.state["season_mode"] == "winter"
@@ -259,3 +262,15 @@ def test_stale_registry_entries():
     assert not stale("sensor", "x_t_outdoor")
     assert not stale("select", "x_select_bus_program")
     assert not stale("sensor", "x_program_mode")
+
+
+@pytest.mark.asyncio
+async def test_compressor_limits_and_surplus_numbers():
+    api = FakeApi(registers={**regs(), 175: f"{400:04x}", 2000: f"{35:04x}"})
+    dev = await api.get()
+    assert dev.state["number_night_compressor_limit"] == 40.0
+    assert dev.state["number_surplus_activation_setpoint"] == 3.5
+    await api.set_numeric_value("number_night_compressor_limit", 45)
+    assert api.writes[-1] == {"idOperacion": 2012, "dir": 175, "num": 1, "01c2": "01c2"}
+    with pytest.raises(ValueError):
+        await api.set_numeric_value("number_night_compressor_limit", 10)

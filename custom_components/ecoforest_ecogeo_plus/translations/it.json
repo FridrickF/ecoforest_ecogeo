@@ -399,6 +399,39 @@
       },
       "number_bus_thermostat_sg4_setpoint": {
         "name": "Setpoint termostato SG4 (BMS)"
+      },
+      "number_surplus_activation_setpoint": {
+        "name": "Soglia attivazione surplus"
+      },
+      "number_consumption_limit_setpoint": {
+        "name": "Limite di consumo"
+      },
+      "number_night_compressor_limit": {
+        "name": "Limite compressore notturno"
+      },
+      "number_compressor_dhw_min": {
+        "name": "Capacità compressore minimo ACS"
+      },
+      "number_compressor_dhw_max": {
+        "name": "Capacità compressore massimo ACS"
+      },
+      "number_compressor_heating_min": {
+        "name": "Capacità compressore minimo riscaldamento"
+      },
+      "number_compressor_heating_max": {
+        "name": "Capacità compressore massimo riscaldamento"
+      },
+      "number_compressor_cooling_min": {
+        "name": "Capacità compressore minimo raffrescamento"
+      },
+      "number_compressor_cooling_max": {
+        "name": "Capacità compressore massimo raffrescamento"
+      },
+      "number_compressor_pool_min": {
+        "name": "Capacità compressore minimo piscina"
+      },
+      "number_compressor_pool_max": {
+        "name": "Capacità compressore massimo piscina"
       }
     },
     "switch": {

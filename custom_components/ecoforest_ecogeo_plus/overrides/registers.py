@@ -36,6 +36,9 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 134, "length": 10, "group": "fast"},   # BUS setpoints
         {"address": 176, "length": 4, "group": "fast"},    # BUS thermostat setpoints
         {"address": 7002, "length": 2, "group": "fast"},   # surplus / consumption limit enable
+        {"address": 2000, "length": 2, "group": "fast"},   # surplus / consumption limit setpoints
+        {"address": 74, "length": 8, "group": "fast"},     # compressor capacity min/max per service (inferred, CSV)
+        {"address": 175, "length": 1, "group": "fast"},    # night time compressor limitation (inferred, CSV)
         {"address": 94, "length": 1, "group": "slow"},
         {"address": 132, "length": 2, "group": "slow"},
         {"address": 186, "length": 8, "group": "slow"},
@@ -86,7 +89,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     "expansion_valve": _ro(133, "percentage"),
     "t_dhw_start": _ro(198, "temperature", slow=False),
     "t_evaporation": _ro(199, "temperature", slow=False),
-    "eer": _ro(202, "measurement"),
+    "eer": _ro(202, "measurement", enabled=True),
     "t_compressor_discharge": _ro(203, "temperature"),
     "t_bus_thermostat_dg1": _ro(186, "temperature"),
     "t_bus_thermostat_sg2": _ro(187, "temperature"),
@@ -185,8 +188,8 @@ def _number(address, entity_type, lo, hi, step=0.1, **extra):
 
 
 # ---- ANALOG read/write (BUS setpoints). Remember: demand AND setpoint must be sent. ----
-# 2000/2001 (surplus setpoints in the 2023 guide) are deliberately NOT mapped: on the HP24 list
-# the same addresses are year/month, so a write could hit something else on older firmware.
+# 2000/2001: surplus / consumption limit setpoints (guide 2023). The HP24 list has year/month at the same
+# addresses, so on older software they may mean something else: read them first, do not write blindly.
 EXTRA_MAPPING.update({
     "number_bus_dhw_setpoint": _number(134, "temperature", 0, 65),                # inferred
     "number_bus_heating_dg1_setpoint": _number(135, "temperature", 20, 55),       # inferred
@@ -202,6 +205,18 @@ EXTRA_MAPPING.update({
     "number_bus_thermostat_sg2_setpoint": _number(177, "temperature", 15, 30),    # inferred
     "number_bus_thermostat_sg3_setpoint": _number(178, "temperature", 15, 30),    # inferred
     "number_bus_thermostat_sg4_setpoint": _number(179, "temperature", 15, 30),    # inferred
+    "number_surplus_activation_setpoint": _number(2000, "power_kw", 0, 30),       # inferred
+    "number_consumption_limit_setpoint": _number(2001, "power_kw", 0, 30),        # inferred
+    # compressor capacity limits in % (Registers.csv / community, not in the official guide) -> inferred
+    "number_compressor_dhw_min": _number(74, "percentage", 25, 100, 1),
+    "number_compressor_dhw_max": _number(75, "percentage", 25, 100, 1),
+    "number_compressor_heating_min": _number(76, "percentage", 25, 100, 1),
+    "number_compressor_heating_max": _number(77, "percentage", 25, 100, 1),
+    "number_compressor_cooling_min": _number(78, "percentage", 25, 100, 1),
+    "number_compressor_cooling_max": _number(79, "percentage", 25, 100, 1),
+    "number_compressor_pool_min": _number(80, "percentage", 25, 100, 1),
+    "number_compressor_pool_max": _number(81, "percentage", 25, 100, 1),
+    "number_night_compressor_limit": _number(175, "percentage", 25, 100, 1),
 })
 
 # ---- INTEGER monthly energies 5144-5179 (unit not specified by the guide: Wh/kWh/MWh) ----
