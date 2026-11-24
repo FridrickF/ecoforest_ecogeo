@@ -52,7 +52,14 @@ class EcoforestEntity(CoordinatorEntity[EcoforestCoordinator]):
     ) -> None:
         """Initialize device information."""
 
-        if definition["entity_type"] in SENSOR_TYPES.keys():
+        if definition["entity_type"] == "text" and "options" in definition:
+            self.entity_description = EcoforestSensorEntityDescription(
+                key=key,
+                translation_key=key,
+                device_class=SensorDeviceClass.ENUM,
+                options=list(definition["options"].values()),
+            )
+        elif definition["entity_type"] in SENSOR_TYPES.keys():
             self.entity_description = EcoforestSensorEntityDescription(
                 key=key,
                 translation_key=key,

@@ -105,13 +105,13 @@
         "name": "Potenza termica resa"
       },
       "power_cooling": {
-        "name": "Potenza frigorifera resa"
+        "name": "Potenza di evaporazione (calore prelevato dalla sorgente)"
       },
       "power_electric": {
         "name": "Potenza elettrica"
       },
       "power_output": {
-        "name": "Potenza resa totale"
+        "name": "Potenza utile resa"
       },
       "t_brine_in": {
         "name": "Temperatura ritorno geotermia"
@@ -210,10 +210,21 @@
         "name": "Versione software 3"
       },
       "hp_state": {
-        "name": "Stato pompa di calore"
+        "name": "Stato pompa di calore",
+        "state": {
+          "keyboard": "Tastiera",
+          "off": "Spento",
+          "on": "Acceso",
+          "emergency": "Emergenza"
+        }
       },
       "season_mode": {
-        "name": "Modo stagionale"
+        "name": "Modo stagionale",
+        "state": {
+          "none": "Non definita",
+          "winter": "Inverno",
+          "summer": "Estate"
+        }
       },
       "device_clock": {
         "name": "Orologio dispositivo"
@@ -486,6 +497,16 @@
           "none": "Nessuna",
           "heating": "Riscaldamento",
           "cooling": "Raffrescamento"
+        }
+      },
+      "select_program_mode": {
+        "name": "Modo di lavoro (inverno/estate/auto)",
+        "state": {
+          "winter": "Inverno",
+          "summer": "Estate",
+          "auto": "Automatico",
+          "mixed": "Misto",
+          "remote": "Remoto (BUS)"
         }
       }
     }

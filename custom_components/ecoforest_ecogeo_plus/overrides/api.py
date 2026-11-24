@@ -124,7 +124,9 @@ MAPPING = {
         "data_type": DataTypes.Register,
         "type": "custom",
         "entity_type": "power",
-        "value_fn": lambda data, raw: data["power_cooling"] + data["power_heating"]
+        "reads": (DataTypes.Coil, (127, 128)),
+        # useful output: heat delivered in winter/unknown, evaporation (cold delivered) in summer
+        "value_fn": lambda data, raw: data["power_cooling"] if _season_of(raw) == "summer" else data["power_heating"]
     },
     "t_brine_in": {
         "data_type": DataTypes.Register,
@@ -251,6 +253,15 @@ MAPPING = {
 MAPPING.update(EXTRA_MAPPING)
 
 
+def _season_of(raw) -> str | None:
+    coils = raw[DataTypes.Coil]
+    if coils.get(127) == "1":
+        return "summer"
+    if coils.get(128) == "1":
+        return "winter"
+    return None
+
+
 def key_of_unique_id(unique_id: str) -> str | None:
     """Entity unique ids are '<device>_<key>': longest matching key wins (hp_state vs select_hp_state)."""
     best = None
@@ -342,7 +353,7 @@ class EcoGeoApi(EcoforestApi):
                     continue
 
             if definition["entity_type"] == "text" and "options" in definition:
-                value = definition["options"].get(value, str(value))
+                value = definition["options"].get(value)  # unknown raw value -> None (enum sensors reject strangers)
 
             device_info[name] = value
 

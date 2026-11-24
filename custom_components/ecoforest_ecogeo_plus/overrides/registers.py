@@ -31,6 +31,7 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 127, "length": 2, "group": "fast"},    # 127 summer, 128 winter
     ],
     DataTypes.Register: [
+        {"address": 5024, "length": 1, "group": "fast"},   # program mode (winter/summer/auto/mixed/remote)
         {"address": 5220, "length": 8, "group": "fast"},   # state, program, demands
         {"address": 134, "length": 10, "group": "fast"},   # BUS setpoints
         {"address": 176, "length": 4, "group": "fast"},    # BUS thermostat setpoints
@@ -51,6 +52,9 @@ C = DataTypes.Coil
 
 HP_STATE = {0: "keyboard", 1: "off", 2: "on", 3: "emergency"}
 BUS_PROGRAM = {0: "keyboard", 1: "winter", 2: "summer", 3: "mixed"}
+SEASON = {0: "none", 1: "winter", 2: "summer"}
+# 5024 is NOT in the official domestic table: it comes from Registers.csv (community list) -> inferred
+PROGRAM_MODE = {0: "winter", 1: "summer", 2: "auto", 3: "mixed", 4: "remote"}
 DEMAND_ONOFF = {0: "none", 1: "demand"}
 DEMAND_HEAT_COOL = {0: "none", 1: "heating", 2: "cooling"}
 
@@ -111,6 +115,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "group": "fast",
         "enabled_default": True,
         "reads": (C, (127, 128)),
+        "options": SEASON,
         "value_fn": lambda data, raw: _season(raw),
     },
     "device_clock": {
@@ -141,6 +146,11 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "data_type": R, "type": "int", "address": 5220, "entity_type": "select",
         "optional": True, "group": "fast", "enabled_default": False, "writable": True,
         "options": HP_STATE,
+    },
+    "select_program_mode": {
+        "data_type": R, "type": "int", "address": 5024, "entity_type": "select",
+        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
+        "options": PROGRAM_MODE,
     },
     "select_bus_program": {
         "data_type": R, "type": "int", "address": 5221, "entity_type": "select",

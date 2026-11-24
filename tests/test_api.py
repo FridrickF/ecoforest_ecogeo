@@ -220,3 +220,29 @@ def test_writable_entities_are_not_also_created_as_sensors():
     # the original three numbers keep their historical read-only sensor twin
     for key in ("number_dhw_setpoint", "number_dhw_dt_start", "number_dhw_htr_set"):
         assert not MAPPING[key].get("writable")
+
+
+@pytest.mark.asyncio
+async def test_power_output_follows_season_and_labels():
+    base = {**regs(), 5083: f"{4365:04x}", 5185: f"{3800:04x}"}
+    winter = await FakeApi(registers=base, coils={128: "1"}).get()
+    assert winter.state["power_heating"] == 4365 and winter.state["power_cooling"] == 3800
+    assert winter.state["power_output"] == 4365  # not 8165 anymore
+    summer = await FakeApi(registers=base, coils={127: "1"}).get()
+    assert summer.state["power_output"] == 3800
+    unknown = await FakeApi(registers=base).get()
+    assert unknown.state["power_output"] == 4365
+    assert winter.state["season_mode"] == "winter"
+
+
+@pytest.mark.asyncio
+async def test_program_mode_select_write_and_translations():
+    api = FakeApi(registers={**regs(), 5024: "0002"})
+    dev = await api.get()
+    assert dev.state["select_program_mode"] == 2
+    await api.set_raw_value("select_program_mode", 1)
+    assert api.writes[-1] == {"idOperacion": 2012, "dir": 5024, "num": 1, "0001": "0001"}
+    for lang in ("en", "it"):
+        tr = json.loads((BASE / "translations" / f"{lang}.json").read_text())
+        assert set(tr["entity"]["sensor"]["season_mode"]["state"]) == {"none", "winter", "summer"}
+        assert set(tr["entity"]["select"]["select_program_mode"]["state"]) == {"winter", "summer", "auto", "mixed", "remote"}
