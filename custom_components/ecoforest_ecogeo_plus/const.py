@@ -3,4 +3,4 @@ from datetime import timedelta
 DOMAIN = "ecoforest_ecogeo_plus"
 MANUFACTURER = "Ecoforest"
 
-POLLING_INTERVAL = timedelta(seconds=30)
+POLLING_INTERVAL = timedelta(seconds=60)

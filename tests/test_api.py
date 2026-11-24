@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 import pytest
-from pyecoforest.exceptions import EcoforestConnectionError
+from pyecoforest.exceptions import EcoforestConnectionError, EcoforestError
 
 from custom_components.ecoforest_ecogeo_plus.overrides import api as api_mod
 from custom_components.ecoforest_ecogeo_plus.overrides.api import EcoGeoApi, MAPPING
@@ -67,14 +67,62 @@ async def test_new_registers_and_state_texts():
 
 
 @pytest.mark.asyncio
-async def test_unreadable_optional_block_is_skipped_and_not_retried():
+async def test_unreadable_optional_block_is_skipped_then_given_up():
     api = FakeApi(registers=regs(), fail={5220})
     dev = await api.get()
     assert dev.state["hp_state"] is None
     assert dev.state["power_electric"] == 0
-    n = sum(1 for _, a in api.reads if a == 5220)
+    for _ in range(5):
+        await api.get()
+    # tried MAX_OPTIONAL_FAILURES times, then not asked again
+    assert api._failures[(DataTypes.Register, 5220)] == api_mod.MAX_OPTIONAL_FAILURES
+
+
+@pytest.mark.asyncio
+async def test_only_blocks_of_enabled_entities_are_read():
+    api = FakeApi(registers=regs())
+    api.wanted = {"hp_state", "power_electric"}
     await api.get()
-    assert sum(1 for _, a in api.reads if a == 5220) == n  # not asked again
+    asked = {a for _, a in api.reads}
+    assert 5220 in asked and 134 not in asked and 2000 not in asked and 7002 not in asked and 5144 not in asked
+    api2 = FakeApi(registers=regs())
+    api2.wanted = {"number_bus_pool_setpoint", "season_mode"}
+    await api2.get()
+    asked2 = {a for _, a in api2.reads}
+    assert 134 in asked2 and 127 in asked2 and 5220 not in asked2
+
+
+def test_parse_variants_and_errors():
+    api = FakeApi()
+    assert api._parse("error_geo_get_reg=0\ndir=1&num=2&00ff&0100") == ["dir=1", "num=2", "00ff", "0100"]
+    assert api._parse("error_geo_get_reg=0\n1&dir=1&num=2&00ff&0100")[-2:] == ["00ff", "0100"]
+    with pytest.raises(EcoforestError):
+        api._parse("error_geo_get_reg=-4\n-4")
+
+
+class RawApi(EcoGeoApi):
+    """Returns canned raw reply tokens to _load_data."""
+
+    def __init__(self, replies):
+        super().__init__("http://x/", "u", "p")
+        self.replies = list(replies)
+
+    async def _request(self, data=None):
+        r = self.replies.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+
+
+@pytest.mark.asyncio
+async def test_load_data_validates_and_retries(monkeypatch):
+    monkeypatch.setattr(api_mod, "RETRY_PAUSE", 0)
+    ok = await RawApi([EcoforestError("-4"), ["dir=1", "num=2", "0001", "00ff"]])._load_data(1, 2, 2002)
+    assert ok == {1: "0001", 2: "00ff"}
+    with pytest.raises(EcoforestError):
+        await RawApi([["num=2", "0001"], ["num=2", "0001"]])._load_data(1, 2, 2002)  # too short / not hex
+    with pytest.raises(EcoforestError):
+        await RawApi([["x", "zz", "0001"], ["x", "zz", "0001"]])._load_data(1, 2, 2002)
 
 
 @pytest.mark.asyncio
@@ -153,3 +201,12 @@ def test_every_mapped_address_is_covered_by_a_request():
     for k, d in MAPPING.items():
         if d["type"] != "custom":
             assert d["address"] in covered[d["data_type"]], k
+
+
+def test_key_of_unique_id():
+    from custom_components.ecoforest_ecogeo_plus.overrides.api import key_of_unique_id
+    assert key_of_unique_id("ec_b_x_hp_state") == "hp_state"
+    assert key_of_unique_id("ec_b_x_select_hp_state") == "select_hp_state"
+    assert key_of_unique_id("alias_t_dhw") == "t_dhw"
+    assert key_of_unique_id("alias_t_dhw_start") == "t_dhw_start"
+    assert key_of_unique_id("nonsense") is None

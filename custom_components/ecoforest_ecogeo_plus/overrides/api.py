@@ -1,10 +1,10 @@
-import string, logging
+import asyncio, re, string, logging
 from dataclasses import dataclass
 
 import httpx
 from pyecoforest.api import EcoforestApi
 
-from pyecoforest.exceptions import EcoforestError
+from pyecoforest.exceptions import EcoforestConnectionError, EcoforestError
 
 from .device import EcoGeoDevice
 from .api_types import DataTypes, Operations
@@ -12,12 +12,16 @@ from .registers import (
     EXTRA_MAPPING,
     OPTIONAL_REQUESTS,
     SLOW_EVERY,
+    addresses_of,
 )
 
 _LOGGER = logging.getLogger(__name__)
+_HEX = re.compile(r"[0-9a-fA-F]{1,4}")
 
 MODEL_ADDRESS = 5323
 MODEL_LENGTH = 6
+MAX_OPTIONAL_FAILURES = 3
+RETRY_PAUSE = 0.3
 
 OP_TYPE_GET_SWITCH = 2001
 OP_TYPE_SET_SWITCH = 2011
@@ -247,6 +251,15 @@ MAPPING = {
 MAPPING.update(EXTRA_MAPPING)
 
 
+def key_of_unique_id(unique_id: str) -> str | None:
+    """Entity unique ids are '<device>_<key>': longest matching key wins (hp_state vs select_hp_state)."""
+    best = None
+    for key in MAPPING:
+        if unique_id.endswith(f"_{key}") and (best is None or len(key) > len(best)):
+            best = key
+    return best
+
+
 class EcoGeoApi(EcoforestApi):
     def __init__(
         self,
@@ -257,7 +270,19 @@ class EcoGeoApi(EcoforestApi):
         super().__init__(host, httpx.BasicAuth(user, password))
         self._state = {DataTypes.Coil: {}, DataTypes.Register: {}}
         self._cycle = 0
-        self._unsupported: set[tuple[int, int]] = set()
+        self._failures: dict[tuple[int, int], int] = {}
+        # keys of the entities that are enabled (set by the coordinator); None = read everything
+        self.wanted: set[str] | None = None
+
+    def _block_wanted(self, dt: int, request: dict) -> bool:
+        if self.wanted is None:
+            return True
+        span = set(range(request["address"], request["address"] + request["length"]))
+        for key in self.wanted:
+            needs = addresses_of(MAPPING.get(key, {}))
+            if needs and needs[0] == dt and needs[1] & span:
+                return True
+        return False
 
     async def get(self) -> EcoGeoDevice:
         state = self._state
@@ -267,24 +292,29 @@ class EcoGeoApi(EcoforestApi):
             for request in REQUESTS[dt]:
                 state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
 
-        # optional blocks: tolerated, "slow" ones are refreshed every SLOW_EVERY polls
+        # optional blocks: only if an enabled entity needs them; tolerated on failure;
+        # "slow" ones are refreshed every SLOW_EVERY polls
         refresh_slow = self._cycle % SLOW_EVERY == 0
         self._cycle += 1
         for dt in [DataTypes.Coil, DataTypes.Register]:
             for request in OPTIONAL_REQUESTS[dt]:
                 key = (dt, request["address"])
-                if key in self._unsupported:
+                if self._failures.get(key, 0) >= MAX_OPTIONAL_FAILURES:
                     continue
-                if request["group"] == "slow" and not refresh_slow:
+                if request["group"] == "slow" and not refresh_slow and key in self._failures:
+                    continue
+                if not self._block_wanted(dt, request):
                     continue
                 try:
                     state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
-                except EcoforestError as err:
-                    _LOGGER.debug("optional block %s/%s not readable (%s), skipping it", dt, request["address"], err)
-                    self._unsupported.add(key)
-                except Exception as err:  # malformed answer from an older firmware
-                    _LOGGER.debug("optional block %s/%s failed (%s), skipping it", dt, request["address"], err)
-                    self._unsupported.add(key)
+                    self._failures[key] = 0
+                except Exception as err:
+                    self._failures[key] = self._failures.get(key, 0) + 1
+                    _LOGGER.debug(
+                        "optional block %s/%s/%s not readable (%s), attempt %s/%s",
+                        dt, request["address"], request["length"], err,
+                        self._failures[key], MAX_OPTIONAL_FAILURES,
+                    )
 
         device_info = {}
         for name, definition in MAPPING.items():
@@ -335,21 +365,23 @@ class EcoGeoApi(EcoforestApi):
         return EcoGeoDevice.build(self.parse_model_name(state), device_info)
 
     async def _load_data(self, address, length, op_type) -> dict[int, str]:
-        response = await self._request(
-            data={
-                "idOperacion": op_type,
-                "dir": address,
-                "num": length
-            }
-        )
-
-        result = {}
-        index = 0
-        for i in range(address, address+length):
-            result[i] = response[index]
-            index += 1
-
-        return result
+        last_error: Exception | None = None
+        for attempt in range(2):  # the gateway sometimes answers -4 / garbage when busy
+            try:
+                response = await self._request(
+                    data={"idOperacion": op_type, "dir": address, "num": length}
+                )
+                values = response[-length:]
+                if len(response) < length or not all(_HEX.fullmatch(v) for v in values):
+                    raise EcoforestError(f"unexpected reply for {address}/{length}: {response}")
+                return dict(zip(range(address, address + length), values))
+            except EcoforestConnectionError as err:
+                raise err
+            except EcoforestError as err:
+                last_error = err
+                _LOGGER.debug("read %s/%s failed (%s), attempt %s", address, length, err, attempt + 1)
+                await asyncio.sleep(RETRY_PAUSE)
+        raise last_error
 
     def _writable(self, name) -> dict:
         definition = MAPPING.get(name)
@@ -393,11 +425,12 @@ class EcoGeoApi(EcoforestApi):
     def _parse(self, response: str) -> list[str]:
         lines = response.split('\n')
 
-        a, b = lines[0].split('=')
-        if a not in ["error_geo_get_reg", "error_geo_get_bit", "error_geo_set_reg", "error_geo_set_bit"] or b != "0":
-            raise Exception("bad response: {}".format(response))
+        a, _, b = lines[0].strip().partition('=')
+        if a not in ["error_geo_get_reg", "error_geo_get_bit", "error_geo_set_reg", "error_geo_set_bit"] or b.strip() != "0":
+            raise EcoforestError("bad response: {}".format(response.strip()))
 
-        return lines[1].split('&')[2:]
+        # header fields vary (dir=..&num=..), callers take the last `length` values
+        return lines[1].strip().split('&') if len(lines) > 1 else []
 
     def parse_model_name(self, data):
         model_dictionary = ["--"] + [*string.digits] + [*string.ascii_uppercase]

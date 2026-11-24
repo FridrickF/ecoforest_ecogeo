@@ -110,6 +110,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "optional": True,
         "group": "fast",
         "enabled_default": True,
+        "reads": (C, (127, 128)),
         "value_fn": lambda data, raw: _season(raw),
     },
     "device_clock": {
@@ -120,6 +121,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "group": "slow",
         "enabled_default": False,
         "diagnostic": True,
+        "reads": (R, tuple(range(5093, 5098))),
         "value_fn": lambda data, raw: _clock(raw),
     },
     # ---- BMS remote control (all disabled by default, need "BMS remote control") -----
@@ -223,3 +225,13 @@ def _clock(raw: dict) -> str | None:
     except (KeyError, ValueError):
         return None
     return f"20{y:02d}-{mo:02d}-{d:02d} {h:02d}:{mi:02d}"
+
+
+def addresses_of(definition: dict) -> tuple[int, frozenset[int]] | None:
+    """(data type, addresses) a definition reads, None if it needs nothing optional."""
+    if "address" in definition:
+        return definition["data_type"], frozenset({definition["address"]})
+    if "reads" in definition:
+        dt, addrs = definition["reads"]
+        return dt, frozenset(addrs)
+    return None
