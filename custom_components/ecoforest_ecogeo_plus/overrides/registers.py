@@ -147,11 +147,8 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
         "optional": True, "group": "fast", "enabled_default": False, "writable": True,
         "options": HP_STATE,
     },
-    "select_program_mode": {
-        "data_type": R, "type": "int", "address": 5024, "entity_type": "select",
-        "optional": True, "group": "fast", "enabled_default": False, "writable": True,
-        "options": PROGRAM_MODE,
-    },
+    # read only: what the keyboard/monitor program is set to (5024, inferred, not in the official guide)
+    "program_mode": _ro(5024, "text", type="int", slow=False, diagnostic=True, options=PROGRAM_MODE),
     "select_bus_program": {
         "data_type": R, "type": "int", "address": 5221, "entity_type": "select",
         "optional": True, "group": "fast", "enabled_default": False, "writable": True,

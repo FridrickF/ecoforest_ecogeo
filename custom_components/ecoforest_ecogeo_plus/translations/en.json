@@ -336,6 +336,16 @@
       },
       "energy_electric_12": {
         "name": "Electrical consumption December"
+      },
+      "program_mode": {
+        "name": "Monitor program (winter/summer/auto)",
+        "state": {
+          "winter": "Winter",
+          "summer": "Summer",
+          "auto": "Auto",
+          "mixed": "Mixed",
+          "remote": "Remote (BUS)"
+        }
       }
     },
     "number": {
@@ -497,16 +507,6 @@
           "none": "None",
           "heating": "Heating",
           "cooling": "Cooling"
-        }
-      },
-      "select_program_mode": {
-        "name": "Program mode (winter/summer/auto)",
-        "state": {
-          "winter": "Winter",
-          "summer": "Summer",
-          "auto": "Auto",
-          "mixed": "Mixed",
-          "remote": "Remote (BUS)"
         }
       }
     }

@@ -236,13 +236,14 @@ async def test_power_output_follows_season_and_labels():
 
 
 @pytest.mark.asyncio
-async def test_program_mode_select_write_and_translations():
+async def test_program_mode_is_read_only_and_translated():
     api = FakeApi(registers={**regs(), 5024: "0002"})
     dev = await api.get()
-    assert dev.state["select_program_mode"] == 2
-    await api.set_raw_value("select_program_mode", 1)
-    assert api.writes[-1] == {"idOperacion": 2012, "dir": 5024, "num": 1, "0001": "0001"}
+    assert dev.state["program_mode"] == "auto"
+    with pytest.raises(Exception):
+        await api.set_raw_value("program_mode", 1)  # not writable
+    assert api.writes == []
     for lang in ("en", "it"):
         tr = json.loads((BASE / "translations" / f"{lang}.json").read_text())
         assert set(tr["entity"]["sensor"]["season_mode"]["state"]) == {"none", "winter", "summer"}
-        assert set(tr["entity"]["select"]["select_program_mode"]["state"]) == {"winter", "summer", "auto", "mixed", "remote"}
+        assert set(tr["entity"]["sensor"]["program_mode"]["state"]) == {"winter", "summer", "auto", "mixed", "remote"}

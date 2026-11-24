@@ -336,6 +336,16 @@
       },
       "energy_electric_12": {
         "name": "Consumo elettrico dicembre"
+      },
+      "program_mode": {
+        "name": "Programma impostato sul monitor",
+        "state": {
+          "winter": "Inverno",
+          "summer": "Estate",
+          "auto": "Automatico",
+          "mixed": "Misto",
+          "remote": "Remoto (BUS)"
+        }
       }
     },
     "number": {
@@ -497,16 +507,6 @@
           "none": "Nessuna",
           "heating": "Riscaldamento",
           "cooling": "Raffrescamento"
-        }
-      },
-      "select_program_mode": {
-        "name": "Modo di lavoro (inverno/estate/auto)",
-        "state": {
-          "winter": "Inverno",
-          "summer": "Estate",
-          "auto": "Automatico",
-          "mixed": "Misto",
-          "remote": "Remoto (BUS)"
         }
       }
     }
