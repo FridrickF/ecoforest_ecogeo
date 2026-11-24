@@ -1,7 +1,8 @@
+import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.exceptions import ConfigEntryNotReady
 from pyecoforest.exceptions import EcoforestAuthenticationRequired, EcoforestConnectionError
@@ -40,10 +41,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
 
     _remove_stale_entities(hass, entry)
+    _register_services(hass)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+def _register_services(hass: HomeAssistant) -> None:
+    if hass.services.has_service(DOMAIN, "dump_registers"):
+        return
+
+    async def dump_registers(call: ServiceCall) -> dict:
+        """Read-only scan of the heat pump registers, written to /config/ecoforest_dump.json."""
+        out = {}
+        for entry_id, coordinator in hass.data.get(DOMAIN, {}).items():
+            out[coordinator.data.model_name] = await coordinator.api.dump()
+        path = hass.config.path("ecoforest_dump.json")
+        await hass.async_add_executor_job(lambda: open(path, "w").write(json.dumps(out, indent=1)))
+        _LOGGER.info("Register dump written to %s", path)
+        return {"file": path, "devices": {k: {"coils": len(v["coils"]), "registers": len(v["registers"]), "errors": v["errors"]} for k, v in out.items()}}
+
+    hass.services.async_register(DOMAIN, "dump_registers", dump_registers, supports_response=SupportsResponse.OPTIONAL)
 
 
 def _remove_stale_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -59,5 +78,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
+        if not hass.data[DOMAIN]:
+            hass.services.async_remove(DOMAIN, "dump_registers")
 
     return unload_ok

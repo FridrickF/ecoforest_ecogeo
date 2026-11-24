@@ -301,3 +301,15 @@ async def test_monthly_energy_and_year_totals():
     assert dev.state["energy_heating_year"] == 1100 + 370
     assert dev.state["energy_electric_year"] == 61 + 220
     assert dev.state["pf_year"] == round(1470 / 281, 1)
+
+
+@pytest.mark.asyncio
+async def test_dump_is_read_only_and_tolerates_errors(monkeypatch):
+    monkeypatch.setattr(api_mod, "RETRY_PAUSE", 0)
+    api = FakeApi(registers={**regs(), 175: "0190", 5082: "01e0"}, coils={53: "1"}, fail={31})
+    out = await api.dump(ranges={DataTypes.Register: [(1, 60), (175, 1), (5082, 1)], DataTypes.Coil: [(50, 5)]}, chunk=30, pause=0)
+    assert out["registers"][175] == {"hex": "0190", "value": 400}
+    assert out["registers"][5082]["value"] == 480
+    assert out["coils"][53] == "1"
+    assert any("reg 31/30" in e for e in out["errors"])
+    assert api.writes == []

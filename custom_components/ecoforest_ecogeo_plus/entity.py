@@ -23,6 +23,7 @@ SENSOR_TYPES = {
     "power": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.WATT, "state_class": SensorStateClass.MEASUREMENT},
     "energy": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR},
     "energy_total": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR, "state_class": SensorStateClass.TOTAL_INCREASING},
+    "kelvin": {"unit": UnitOfTemperature.KELVIN, "state_class": SensorStateClass.MEASUREMENT},
     "power_kw": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.KILO_WATT, "state_class": SensorStateClass.MEASUREMENT},
     "percentage": {"unit": PERCENTAGE, "state_class": SensorStateClass.MEASUREMENT},
     "rpm": {"unit": REVOLUTIONS_PER_MINUTE, "state_class": SensorStateClass.MEASUREMENT},

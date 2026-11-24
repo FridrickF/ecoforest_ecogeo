@@ -21,6 +21,12 @@ _HEX = re.compile(r"[0-9a-fA-F]{1,4}")
 MODEL_ADDRESS = 5323
 MODEL_LENGTH = 6
 MAX_OPTIONAL_FAILURES = 3
+
+# ranges scanned by the dump_registers service (read only)
+DUMP_RANGES = {
+    DataTypes.Coil: [(1, 300)],
+    DataTypes.Register: [(1, 300), (2000, 40), (5000, 330), (7000, 10)],
+}
 RETRY_PAUSE = 0.3
 
 OP_TYPE_GET_SWITCH = 2001
@@ -424,6 +430,31 @@ class EcoGeoApi(EcoforestApi):
                 _LOGGER.debug("read %s/%s failed (%s), attempt %s", address, length, err, attempt + 1)
                 await asyncio.sleep(RETRY_PAUSE)
         raise last_error
+
+    async def dump(self, ranges: dict[int, list[tuple[int, int]]] | None = None, chunk: int = 30, pause: float = 0.3) -> dict:
+        """Read-only scan of address ranges, to discover registers that nobody documented.
+
+        Returns {"coils": {addr: "0"/"1"}, "registers": {addr: {"hex": .., "value": signed int}}, "errors": [...]}.
+        """
+        ranges = ranges or DUMP_RANGES
+        result: dict = {"coils": {}, "registers": {}, "errors": []}
+        for dt, spans in ranges.items():
+            for start, length in spans:
+                for address in range(start, start + length, chunk):
+                    num = min(chunk, start + length - address)
+                    try:
+                        values = await self._load_data(address, num, Operations.Get[dt])
+                    except EcoforestError as err:
+                        result["errors"].append(f"{'coil' if dt == DataTypes.Coil else 'reg'} {address}/{num}: {err}")
+                        await asyncio.sleep(pause)
+                        continue
+                    for a_, v in values.items():
+                        if dt == DataTypes.Coil:
+                            result["coils"][a_] = v
+                        else:
+                            result["registers"][a_] = {"hex": v, "value": self.parse_ecoforest_int(v)}
+                    await asyncio.sleep(pause)
+        return result
 
     def _writable(self, name) -> dict:
         definition = MAPPING.get(name)

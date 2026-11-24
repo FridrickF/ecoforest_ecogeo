@@ -84,7 +84,7 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     "p_compressor_discharge": _ro(7, "pressure", slow=False),
     "t_airunit_out": _ro(29, "temperature", slow=False),
     "t_condensation": _ro(94, "temperature"),
-    "superheat": _ro(132, "measurement"),
+    "superheat": _ro(132, "kelvin"),
     "expansion_valve": _ro(133, "percentage"),
     "t_dhw_start": _ro(198, "temperature", slow=False),
     "t_evaporation": _ro(199, "temperature", slow=False),
