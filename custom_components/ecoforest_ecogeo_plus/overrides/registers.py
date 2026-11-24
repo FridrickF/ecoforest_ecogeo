@@ -108,6 +108,8 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     # 5220 heat pump state as a human readable sensor (read works without BMS control)
     "hp_state": _ro(5220, "text", type="int", slow=False, enabled=True, options=HP_STATE),
     # ---- COILS, read only -----------------------------------------------------------
+    # coil 50: 1 = no alarm, 0 = active alarm (the "alarm" sensor reports which one, from the coil list)
+    "alarm_status": _ro(50, "text", type="boolean", slow=False, data_type=C, options={True: "ok", False: "alarm"}),
     "season_mode": {
         "data_type": R,
         "type": "custom",

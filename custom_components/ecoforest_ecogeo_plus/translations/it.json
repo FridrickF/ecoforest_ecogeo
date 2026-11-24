@@ -376,6 +376,13 @@
       },
       "number_dhw_htr_set": {
         "name": "Setpoint ACS con recupero HTR (sola lettura)"
+      },
+      "alarm_status": {
+        "name": "Stato allarme",
+        "state": {
+          "ok": "Nessun allarme",
+          "alarm": "Allarme attivo"
+        }
       }
     },
     "number": {

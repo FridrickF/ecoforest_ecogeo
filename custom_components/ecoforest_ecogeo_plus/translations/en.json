@@ -376,6 +376,13 @@
       },
       "number_dhw_htr_set": {
         "name": "DHW HTR set temperature (read only)"
+      },
+      "alarm_status": {
+        "name": "Alarm status",
+        "state": {
+          "ok": "No alarm",
+          "alarm": "Alarm active"
+        }
       }
     },
     "number": {

@@ -313,3 +313,25 @@ async def test_dump_is_read_only_and_tolerates_errors(monkeypatch):
     assert out["coils"][53] == "1"
     assert any("reg 31/30" in e for e in out["errors"])
     assert api.writes == []
+
+
+@pytest.mark.asyncio
+async def test_alarm_status_from_coil_50():
+    ok = await FakeApi(registers=regs(), coils={50: "1"}).get()
+    bad = await FakeApi(registers=regs(), coils={50: "0"}).get()
+    assert ok.state["alarm_status"] == "ok" and bad.state["alarm_status"] == "alarm"
+
+
+def test_whole_domestic_table_is_mapped():
+    """Every address of the 2023 domestic table (pp. 8-10) is read by some entity."""
+    analog = [*range(1, 9), 11, 13, 14, 15, 29, 30, 31, 94, 132, 133, *range(134, 144), *range(176, 180),
+              *range(186, 190), 194, 195, 196, *range(198, 204), 2000, 2001]
+    integer = [5002, 5004, 5005, *range(5080, 5084), *range(5093, 5098), *range(5144, 5180), 5185,
+               *range(5220, 5228), 5281, 5282, 5285, 5286, 5287, 7002, 7003]
+    boolean = [50, 53, 127, 128]
+    regs_mapped = {d["address"] for d in MAPPING.values() if d.get("data_type") == DataTypes.Register and "address" in d}
+    regs_mapped |= set(range(5093, 5098))  # device_clock
+    coils_mapped = {d["address"] for d in MAPPING.values() if d.get("data_type") == DataTypes.Coil and "address" in d}
+    coils_mapped |= {127, 128}  # season_mode
+    assert set(analog + integer) <= regs_mapped, sorted(set(analog + integer) - regs_mapped)
+    assert set(boolean) <= coils_mapped, sorted(set(boolean) - coils_mapped)
