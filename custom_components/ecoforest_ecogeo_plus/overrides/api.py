@@ -321,6 +321,7 @@ class EcoGeoApi(EcoforestApi):
         self._failures: dict[tuple[int, int], int] = {}
         # keys of the entities that are enabled (set by the coordinator); None = read everything
         self.wanted: set[str] | None = None
+        self.slow_every = SLOW_EVERY
 
     def _block_wanted(self, dt: int, request: dict) -> bool:
         if self.wanted is None:
@@ -342,7 +343,7 @@ class EcoGeoApi(EcoforestApi):
 
         # optional blocks: only if an enabled entity needs them; tolerated on failure;
         # "slow" ones are refreshed every SLOW_EVERY polls
-        refresh_slow = self._cycle % SLOW_EVERY == 0
+        refresh_slow = self._cycle % self.slow_every == 0
         self._cycle += 1
         for dt in [DataTypes.Coil, DataTypes.Register]:
             for request in OPTIONAL_REQUESTS[dt]:

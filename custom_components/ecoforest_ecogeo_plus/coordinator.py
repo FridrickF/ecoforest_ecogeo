@@ -1,6 +1,7 @@
 """The ecoforest coordinator."""
 
 import logging
+from datetime import timedelta
 
 from pyecoforest.exceptions import EcoforestError
 
@@ -10,7 +11,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .overrides.api import EcoGeoApi, MAPPING, key_of_unique_id
 from .overrides.device import EcoGeoDevice
-from .const import POLLING_INTERVAL
+from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, SLOW_REFRESH_SECONDS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,13 +22,18 @@ class EcoforestCoordinator(DataUpdateCoordinator[EcoGeoDevice]):
     def __init__(self, hass: HomeAssistant, api: EcoGeoApi) -> None:
         """Initialize DataUpdateCoordinator."""
 
+        seconds = DEFAULT_SCAN_INTERVAL
         super().__init__(
             hass,
             _LOGGER,
             name="ecoforest_ecogeo_plus",
-            update_interval=POLLING_INTERVAL,
+            update_interval=timedelta(seconds=seconds),
         )
+        if self.config_entry is not None:
+            seconds = int(self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
+            self.update_interval = timedelta(seconds=seconds)
         self.api = api
+        self.api.slow_every = max(1, round(SLOW_REFRESH_SECONDS / seconds))
 
     def _enabled_keys(self) -> set[str]:
         """Keys of the entities that are enabled (registry) or enabled by default (not yet registered)."""

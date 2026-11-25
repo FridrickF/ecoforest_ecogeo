@@ -335,3 +335,12 @@ def test_whole_domestic_table_is_mapped():
     coils_mapped |= {127, 128}  # season_mode
     assert set(analog + integer) <= regs_mapped, sorted(set(analog + integer) - regs_mapped)
     assert set(boolean) <= coils_mapped, sorted(set(boolean) - coils_mapped)
+
+
+@pytest.mark.asyncio
+async def test_slow_blocks_follow_slow_every():
+    api = FakeApi(registers=regs())
+    api.slow_every = 3
+    for _ in range(6):
+        await api.get()
+    assert sum(1 for _, a in api.reads if a == 5144) == 2  # polls 1 and 4

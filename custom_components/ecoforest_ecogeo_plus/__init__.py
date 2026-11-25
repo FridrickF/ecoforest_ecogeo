@@ -42,10 +42,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _remove_stale_entities(hass, entry)
     _register_services(hass)
+    entry.async_on_unload(entry.add_update_listener(_reload_on_options))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+async def _reload_on_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 def _register_services(hass: HomeAssistant) -> None:

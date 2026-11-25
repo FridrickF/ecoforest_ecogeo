@@ -574,5 +574,18 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ecoforest",
+        "data": {
+          "scan_interval": "Intervallo di aggiornamento (secondi)"
+        },
+        "data_description": {
+          "scan_interval": "Ogni quanto leggere la pompa di calore. Valori bassi significano più richieste al gateway Easynet."
+        }
+      }
+    }
   }
 }

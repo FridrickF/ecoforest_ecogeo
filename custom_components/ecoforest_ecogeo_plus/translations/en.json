@@ -574,5 +574,18 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ecoforest",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often the heat pump is read. Lower values mean more requests to the Easynet gateway."
+        }
+      }
+    }
   }
 }
