@@ -344,3 +344,14 @@ async def test_slow_blocks_follow_slow_every():
     for _ in range(6):
         await api.get()
     assert sum(1 for _, a in api.reads if a == 5144) == 2  # polls 1 and 4
+
+
+@pytest.mark.asyncio
+async def test_live_values_are_read_every_poll():
+    api = FakeApi(registers=regs())
+    api.slow_every = 100
+    for _ in range(3):
+        await api.get()
+    for addr in (5002, 94, 132, 202, 5220):  # compressor rpm, condensation T, superheat, EER, state
+        assert sum(1 for _, a in api.reads if a == addr) == 3, addr
+    assert sum(1 for _, a in api.reads if a == 5144) == 1  # monthly energies: slow

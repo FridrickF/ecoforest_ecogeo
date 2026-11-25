@@ -38,11 +38,11 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 2000, "length": 2, "group": "fast"},   # surplus / consumption limit setpoints
         {"address": 74, "length": 8, "group": "fast"},     # compressor capacity min/max per service (inferred, CSV)
         {"address": 175, "length": 1, "group": "fast"},    # night time compressor limitation (inferred, CSV)
-        {"address": 94, "length": 1, "group": "slow"},
-        {"address": 132, "length": 2, "group": "slow"},
+        {"address": 94, "length": 1, "group": "fast"},
+        {"address": 132, "length": 2, "group": "fast"},
         {"address": 186, "length": 8, "group": "slow"},
-        {"address": 202, "length": 2, "group": "slow"},
-        {"address": 5002, "length": 4, "group": "slow"},
+        {"address": 202, "length": 2, "group": "fast"},
+        {"address": 5002, "length": 4, "group": "fast"},
         {"address": 5093, "length": 5, "group": "slow"},
         {"address": 5144, "length": 36, "group": "slow"},
         {"address": 5281, "length": 7, "group": "slow"},
