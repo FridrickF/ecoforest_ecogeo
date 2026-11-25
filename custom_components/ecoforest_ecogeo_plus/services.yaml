@@ -2,4 +2,12 @@ dump_registers:
   name: Dump registers
   description: >-
     Read-only scan of the heat pump coils and registers (about 30 requests, a few seconds).
-    The result is written to ecoforest_dump.json in the Home Assistant config folder.
+    The result is written to ecoforest_dump_<date>_<time>.json in the Home Assistant config folder.
+  fields:
+    note:
+      name: Note
+      description: What the heat pump is doing now (for example "heating, compressor 40%, DHW tank 48 C").
+      required: false
+      example: "heating, compressor 40%"
+      selector:
+        text:

@@ -1,6 +1,9 @@
 import json
 import logging
 
+import voluptuous as vol
+from homeassistant.util import dt as dt_util
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, Platform
@@ -58,16 +61,29 @@ def _register_services(hass: HomeAssistant) -> None:
         return
 
     async def dump_registers(call: ServiceCall) -> dict:
-        """Read-only scan of the heat pump registers, written to /config/ecoforest_dump.json."""
-        out = {}
-        for entry_id, coordinator in hass.data.get(DOMAIN, {}).items():
-            out[coordinator.data.model_name] = await coordinator.api.dump()
-        path = hass.config.path("ecoforest_dump.json")
+        """Read-only scan of the heat pump registers, written to /config/ecoforest_dump_<date>.json."""
+        now = dt_util.now()
+        out = {"time": now.isoformat(), "note": call.data.get("note", ""), "devices": {}}
+        for coordinator in hass.data.get(DOMAIN, {}).values():
+            out["devices"][coordinator.data.model_name] = await coordinator.api.dump()
+        path = hass.config.path(f"ecoforest_dump_{now:%Y%m%d_%H%M%S}.json")
         await hass.async_add_executor_job(lambda: open(path, "w").write(json.dumps(out, indent=1)))
         _LOGGER.info("Register dump written to %s", path)
-        return {"file": path, "devices": {k: {"coils": len(v["coils"]), "registers": len(v["registers"]), "errors": v["errors"]} for k, v in out.items()}}
+        return {
+            "file": path,
+            "devices": {
+                k: {"coils": len(v["coils"]), "registers": len(v["registers"]), "errors": v["errors"]}
+                for k, v in out["devices"].items()
+            },
+        }
 
-    hass.services.async_register(DOMAIN, "dump_registers", dump_registers, supports_response=SupportsResponse.OPTIONAL)
+    hass.services.async_register(
+        DOMAIN,
+        "dump_registers",
+        dump_registers,
+        schema=vol.Schema({vol.Optional("note", default=""): str}),
+        supports_response=SupportsResponse.OPTIONAL,
+    )
 
 
 def _remove_stale_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
