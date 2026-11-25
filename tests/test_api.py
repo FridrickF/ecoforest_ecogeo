@@ -355,3 +355,22 @@ async def test_live_values_are_read_every_poll():
     for addr in (5002, 94, 132, 202, 5220):  # compressor rpm, condensation T, superheat, EER, state
         assert sum(1 for _, a in api.reads if a == addr) == 3, addr
     assert sum(1 for _, a in api.reads if a == 5144) == 1  # monthly energies: slow
+
+
+@pytest.mark.asyncio
+async def test_requests_to_the_gateway_are_serialized(monkeypatch):
+    import asyncio
+    from pyecoforest.api import EcoforestApi
+    running = {"now": 0, "max": 0}
+
+    async def slow(self, data=None):
+        running["now"] += 1
+        running["max"] = max(running["max"], running["now"])
+        await asyncio.sleep(0.01)
+        running["now"] -= 1
+        return ["0000"]
+
+    monkeypatch.setattr(EcoforestApi, "_request", slow)
+    api = EcoGeoApi("http://x/", "u", "p")
+    await asyncio.gather(*(api._request({"a": i}) for i in range(5)))
+    assert running["max"] == 1

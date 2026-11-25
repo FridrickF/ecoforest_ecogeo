@@ -322,6 +322,11 @@ class EcoGeoApi(EcoforestApi):
         # keys of the entities that are enabled (set by the coordinator); None = read everything
         self.wanted: set[str] | None = None
         self.slow_every = SLOW_EVERY
+        self._lock = asyncio.Lock()  # never two requests at the same time to the (fragile) gateway
+
+    async def _request(self, data=None):
+        async with self._lock:
+            return await super()._request(data)
 
     def _block_wanted(self, dt: int, request: dict) -> bool:
         if self.wanted is None:

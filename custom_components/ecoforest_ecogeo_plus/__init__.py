@@ -1,5 +1,8 @@
+import asyncio
+import glob
 import json
 import logging
+import os
 
 import voluptuous as vol
 from homeassistant.util import dt as dt_util
@@ -56,18 +59,38 @@ async def _reload_on_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
 
+MAX_DUMP_FILES = 100
+
+
+def _write_and_prune(config_dir: str, path: str, content: str) -> None:
+    with open(path, "w") as handle:
+        handle.write(content)
+    files = sorted(glob.glob(os.path.join(config_dir, "ecoforest_dump_*.json")))
+    for old in files[:-MAX_DUMP_FILES]:
+        os.remove(old)
+
+
 def _register_services(hass: HomeAssistant) -> None:
     if hass.services.has_service(DOMAIN, "dump_registers"):
         return
 
+    dump_lock = asyncio.Lock()
+
     async def dump_registers(call: ServiceCall) -> dict:
         """Read-only scan of the heat pump registers, written to /config/ecoforest_dump_<date>.json."""
-        now = dt_util.now()
-        out = {"time": now.isoformat(), "note": call.data.get("note", ""), "devices": {}}
-        for coordinator in hass.data.get(DOMAIN, {}).values():
-            out["devices"][coordinator.data.model_name] = await coordinator.api.dump()
+        if dump_lock.locked():
+            _LOGGER.info("A register dump is already running, skipping this one")
+            return {"skipped": True}
+        async with dump_lock:
+            now = dt_util.now()
+            out = {"time": now.isoformat(), "note": call.data.get("note", ""), "devices": {}}
+            for coordinator in hass.data.get(DOMAIN, {}).values():
+                device = await coordinator.api.dump()
+                # what the integration itself shows at that moment: rpm, powers, temperatures, state...
+                device["entities"] = dict(coordinator.data.state or {})
+                out["devices"][coordinator.data.model_name] = device
         path = hass.config.path(f"ecoforest_dump_{now:%Y%m%d_%H%M%S}.json")
-        await hass.async_add_executor_job(lambda: open(path, "w").write(json.dumps(out, indent=1)))
+        await hass.async_add_executor_job(_write_and_prune, hass.config.path(), path, json.dumps(out, indent=1, default=str))
         _LOGGER.info("Register dump written to %s", path)
         return {
             "file": path,
