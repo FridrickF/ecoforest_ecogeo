@@ -392,29 +392,41 @@
           "running": "In marcia"
         }
       },
-      "t_heating_flow_setpoint": {
-        "name": "Setpoint mandata riscaldamento (curva)"
-      },
-      "t_heating_return_setpoint": {
-        "name": "Secondo setpoint riscaldamento (curva, ipotesi)"
-      },
       "t_dhw_setpoint_effective": {
         "name": "Setpoint ACS in vigore (fascia oraria)"
-      },
-      "compressor_capacity_request": {
-        "name": "Richiesta potenza compressore (ipotesi)"
-      },
-      "heating_demand_integral": {
-        "name": "Integrale richiesta riscaldamento (ipotesi)"
       },
       "startup_countdown": {
         "name": "Conto alla rovescia fase di avvio"
       },
-      "circulation": {
-        "name": "Circolazione (ipotesi)"
-      },
       "status_bits": {
         "name": "Bit di stato (5138)"
+      },
+      "t_buffer_heating_stop": {
+        "name": "Temperatura fine carica accumulo riscaldamento"
+      },
+      "t_buffer_heating_setpoint": {
+        "name": "Setpoint accumulo riscaldamento"
+      },
+      "buffer_heating_start_dt": {
+        "name": "DT inizio accumulo riscaldamento"
+      },
+      "t_dg1_heating_setpoint": {
+        "name": "Setpoint riscaldamento DG1"
+      },
+      "t_sg2_heating_setpoint": {
+        "name": "Setpoint riscaldamento SG2"
+      },
+      "sg2_regulation": {
+        "name": "Regolazione SG2"
+      },
+      "pump_brine": {
+        "name": "Pompa captazione"
+      },
+      "pump_production": {
+        "name": "Pompa produzione"
+      },
+      "ground_ratio": {
+        "name": "Quota geotermica"
       }
     },
     "number": {

@@ -392,29 +392,41 @@
           "running": "Running"
         }
       },
-      "t_heating_flow_setpoint": {
-        "name": "Heating flow setpoint (curve)"
-      },
-      "t_heating_return_setpoint": {
-        "name": "Heating second setpoint (curve, inferred)"
-      },
       "t_dhw_setpoint_effective": {
         "name": "DHW setpoint in force (time band)"
-      },
-      "compressor_capacity_request": {
-        "name": "Compressor capacity request (inferred)"
-      },
-      "heating_demand_integral": {
-        "name": "Heating demand integral (inferred)"
       },
       "startup_countdown": {
         "name": "Start-up phase countdown"
       },
-      "circulation": {
-        "name": "Circulation (inferred)"
-      },
       "status_bits": {
         "name": "Status bits (5138)"
+      },
+      "t_buffer_heating_stop": {
+        "name": "Heating buffer charge stop temperature"
+      },
+      "t_buffer_heating_setpoint": {
+        "name": "Heating buffer setpoint"
+      },
+      "buffer_heating_start_dt": {
+        "name": "Heating buffer start differential"
+      },
+      "t_dg1_heating_setpoint": {
+        "name": "DG1 heating setpoint"
+      },
+      "t_sg2_heating_setpoint": {
+        "name": "SG2 heating setpoint"
+      },
+      "sg2_regulation": {
+        "name": "SG2 regulation"
+      },
+      "pump_brine": {
+        "name": "Brine (source) pump"
+      },
+      "pump_production": {
+        "name": "Production pump"
+      },
+      "ground_ratio": {
+        "name": "Geothermal share"
       }
     },
     "number": {

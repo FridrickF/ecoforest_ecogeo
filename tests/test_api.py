@@ -422,20 +422,24 @@ async def test_required_block_busy_without_previous_values_fails(monkeypatch):
 @pytest.mark.asyncio
 async def test_registers_found_with_the_dumps():
     api = FakeApi(registers={
-        **regs(), 5062: "0003", 5065: "0136", 5066: "00fc", 214: "01f4", 5033: "01c4",
-        5210: "01ad", 5280: "000f", 5296: "0064", 5138: "8840",
+        **regs(), 5062: "0003", 5065: "0136", 5066: "00fd", 214: "01a4", 215: "0105", 58: "0019",
+        97: "0105", 5033: "01c4", 5034: "01e2", 5210: "03d4", 5280: "000f", 5296: "0064", 5138: "8840",
     })
     s = (await api.get()).state
     assert s["compressor_state"] == "running"
-    assert s["t_heating_flow_setpoint"] == 31.0
-    assert s["t_heating_return_setpoint"] == 25.2
-    assert s["t_dhw_setpoint_effective"] == 50.0
-    assert s["compressor_capacity_request"] == 45.2
-    assert s["heating_demand_integral"] == 429
+    assert s["t_buffer_heating_stop"] == 31.0
+    assert s["t_buffer_heating_setpoint"] == 26.1
+    assert s["buffer_heating_start_dt"] == 2.5
+    assert s["t_dg1_heating_setpoint"] == 26.1
+    assert s["t_sg2_heating_setpoint"] == 25.3
+    assert s["sg2_regulation"] == 98.0
+    assert s["t_dhw_setpoint_effective"] == 42.0
+    assert s["pump_brine"] == 45.2
+    assert s["pump_production"] == 48.2
     assert s["startup_countdown"] == 15
-    assert s["circulation"] == 100
+    assert s["ground_ratio"] == 100
     assert s["status_bits"] == -30656
-    for key in ("compressor_state", "t_heating_flow_setpoint", "t_dhw_setpoint_effective", "startup_countdown"):
+    for key in ("compressor_state", "t_buffer_heating_setpoint", "pump_brine", "sg2_regulation"):
         assert MAPPING[key]["enabled_default"] is True
     api.registers[5062] = "0002"  # never seen: unknown state -> None, not an error
     assert (await api.get()).state["compressor_state"] is None

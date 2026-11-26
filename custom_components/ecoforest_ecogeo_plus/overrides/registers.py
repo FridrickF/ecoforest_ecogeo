@@ -46,14 +46,16 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 5093, "length": 5, "group": "slow"},
         {"address": 5144, "length": 36, "group": "slow"},
         {"address": 5281, "length": 7, "group": "slow"},
-        # found with dump_registers (Ecogeo HTR, firmware 0.4.18), not in the official table
-        {"address": 5033, "length": 1, "group": "fast"},   # compressor capacity request (per mille)
-        {"address": 5062, "length": 4, "group": "fast"},   # 5062 compressor state, 5065 heating flow setpoint
-        {"address": 214, "length": 1, "group": "slow"},    # effective DHW setpoint (time bands)
+        # found with dump_registers, names from the gateway's own installer pages (informacion_installer*.js)
+        {"address": 5033, "length": 2, "group": "fast"},   # brine / production pump (per mille)
+        {"address": 5062, "length": 4, "group": "fast"},   # 5062 compressor state, 5065 buffer charge stop T
+        {"address": 214, "length": 2, "group": "slow"},    # DHW setpoint in force, heating buffer setpoint
+        {"address": 58, "length": 1, "group": "slow"},     # heating buffer start differential
+        {"address": 97, "length": 1, "group": "slow"},     # DG1 heating setpoint
         {"address": 5138, "length": 1, "group": "slow"},   # status bits
-        {"address": 5210, "length": 1, "group": "slow"},   # heating demand integral
+        {"address": 5210, "length": 1, "group": "fast"},   # SG2 regulation (per mille)
         {"address": 5280, "length": 1, "group": "fast"},   # start-up countdown (minutes)
-        {"address": 5296, "length": 1, "group": "fast"},   # circulation (0 / 100)
+        {"address": 5296, "length": 1, "group": "fast"},   # ground share (geothermal ratio)
     ],
 }
 R = DataTypes.Register
@@ -117,15 +119,19 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     "software_version_3": _ro(5287, "raw", type="int", diagnostic=True),
     # 5220 heat pump state as a human readable sensor (read works without BMS control)
     "hp_state": _ro(5220, "text", type="int", slow=False, enabled=True, options=HP_STATE),
-    # ---- found with dump_registers (inferred from a day of dumps, not in the official guide) ----
+    # ---- found with dump_registers; names checked against the gateway installer pages ----
     "compressor_state": _ro(5062, "text", type="int", slow=False, diagnostic=True, options=COMPRESSOR_STATE),
-    "t_heating_flow_setpoint": _ro(5065, "temperature", slow=False),
-    "t_heating_return_setpoint": _ro(5066, "temperature", slow=False),
-    "t_dhw_setpoint_effective": _ro(214, "temperature"),
-    "compressor_capacity_request": _ro(5033, "percentage", slow=False),
-    "heating_demand_integral": _ro(5210, "measurement", type="int", diagnostic=True),
+    "t_buffer_heating_stop": _ro(5065, "temperature", slow=False),        # buffer setpoint + flow DT (inferred)
+    "t_buffer_heating_setpoint": _ro(215, "temperature"),                 # set_inercia_heat
+    "buffer_heating_start_dt": _ro(58, "kelvin", diagnostic=True),        # offset_inercia_heat
+    "t_dg1_heating_setpoint": _ro(97, "temperature"),                     # set_th1
+    "t_sg2_heating_setpoint": _ro(5066, "temperature", slow=False),       # set_th2
+    "sg2_regulation": _ro(5210, "percentage", slow=False),                # reg_th2 (per mille)
+    "t_dhw_setpoint_effective": _ro(214, "temperature"),                  # consigna_acs
+    "pump_brine": _ro(5033, "percentage", slow=False),                    # Reg_BC (bomba captacion)
+    "pump_production": _ro(5034, "percentage", slow=False),               # Reg_BP (bomba produccion)
     "startup_countdown": _ro(5280, "minutes", type="int", slow=False, diagnostic=True),
-    "circulation": _ro(5296, "percentage", type="int", slow=False, diagnostic=True),
+    "ground_ratio": _ro(5296, "percentage", type="int", slow=False, diagnostic=True),  # ratio_tierra
     "status_bits": _ro(5138, "raw", type="int", diagnostic=True),
     # ---- COILS, read only -----------------------------------------------------------
     # coil 50: 1 = no alarm, 0 = active alarm (the "alarm" sensor reports which one, from the coil list)
