@@ -258,7 +258,7 @@
         "name": "Consumo elettrico (12 mesi)"
       },
       "pf_year": {
-        "name": "PF (12 mesi)"
+        "name": "SPF annuale (12 mesi)"
       },
       "number_dhw_setpoint": {
         "name": "Setpoint ACS (sola lettura)"
@@ -321,7 +321,7 @@
         "name": "Quota geotermica"
       },
       "pf_month": {
-        "name": "PF (mese corrente)"
+        "name": "SPF mensile"
       },
       "night_band": {
         "name": "Fascia notturna"

@@ -258,7 +258,7 @@
         "name": "Electrical consumption (12 months)"
       },
       "pf_year": {
-        "name": "PF (12 months)"
+        "name": "Annual SPF (12 months)"
       },
       "number_dhw_setpoint": {
         "name": "DHW set temperature (read only)"
@@ -321,7 +321,7 @@
         "name": "Geothermal share"
       },
       "pf_month": {
-        "name": "PF (current month)"
+        "name": "Monthly SPF"
       },
       "night_band": {
         "name": "Night band"
