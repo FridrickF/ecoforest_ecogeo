@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription, SensorStateClass
-from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, EntityCategory, UnitOfEnergy, UnitOfTemperature, UnitOfPower, UnitOfPressure
+from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, EntityCategory, UnitOfEnergy, UnitOfTemperature, UnitOfPower, UnitOfPressure, UnitOfTime
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityDescription, generate_entity_id
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -28,6 +28,7 @@ SENSOR_TYPES = {
     "percentage": {"unit": PERCENTAGE, "state_class": SensorStateClass.MEASUREMENT},
     "rpm": {"unit": REVOLUTIONS_PER_MINUTE, "state_class": SensorStateClass.MEASUREMENT},
     "counter": {"state_class": SensorStateClass.TOTAL_INCREASING},
+    "minutes": {"class": SensorDeviceClass.DURATION, "unit": UnitOfTime.MINUTES, "state_class": SensorStateClass.MEASUREMENT},
     "raw": {},
     "text": {},
     "measurement": {"state_class": SensorStateClass.MEASUREMENT},

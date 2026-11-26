@@ -46,6 +46,14 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 5093, "length": 5, "group": "slow"},
         {"address": 5144, "length": 36, "group": "slow"},
         {"address": 5281, "length": 7, "group": "slow"},
+        # found with dump_registers (Ecogeo HTR, firmware 0.4.18), not in the official table
+        {"address": 5033, "length": 1, "group": "fast"},   # compressor capacity request (per mille)
+        {"address": 5062, "length": 4, "group": "fast"},   # 5062 compressor state, 5065 heating flow setpoint
+        {"address": 214, "length": 1, "group": "slow"},    # effective DHW setpoint (time bands)
+        {"address": 5138, "length": 1, "group": "slow"},   # status bits
+        {"address": 5210, "length": 1, "group": "slow"},   # heating demand integral
+        {"address": 5280, "length": 1, "group": "fast"},   # start-up countdown (minutes)
+        {"address": 5296, "length": 1, "group": "fast"},   # circulation (0 / 100)
     ],
 }
 R = DataTypes.Register
@@ -58,6 +66,8 @@ SEASON = {0: "none", 1: "winter", 2: "summer"}
 PROGRAM_MODE = {0: "winter", 1: "summer", 2: "auto", 3: "mixed", 4: "remote"}
 DEMAND_ONOFF = {0: "none", 1: "demand"}
 DEMAND_HEAT_COOL = {0: "none", 1: "heating", 2: "cooling"}
+
+COMPRESSOR_STATE = {0: "off", 1: "starting", 3: "running"}
 
 MONTHS = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 
@@ -107,6 +117,16 @@ EXTRA_MAPPING: dict[str, dict[str, Any]] = {
     "software_version_3": _ro(5287, "raw", type="int", diagnostic=True),
     # 5220 heat pump state as a human readable sensor (read works without BMS control)
     "hp_state": _ro(5220, "text", type="int", slow=False, enabled=True, options=HP_STATE),
+    # ---- found with dump_registers (inferred from a day of dumps, not in the official guide) ----
+    "compressor_state": _ro(5062, "text", type="int", slow=False, diagnostic=True, options=COMPRESSOR_STATE),
+    "t_heating_flow_setpoint": _ro(5065, "temperature", slow=False),
+    "t_heating_return_setpoint": _ro(5066, "temperature", slow=False),
+    "t_dhw_setpoint_effective": _ro(214, "temperature"),
+    "compressor_capacity_request": _ro(5033, "percentage", slow=False),
+    "heating_demand_integral": _ro(5210, "measurement", type="int", diagnostic=True),
+    "startup_countdown": _ro(5280, "minutes", type="int", slow=False, diagnostic=True),
+    "circulation": _ro(5296, "percentage", type="int", slow=False, diagnostic=True),
+    "status_bits": _ro(5138, "raw", type="int", diagnostic=True),
     # ---- COILS, read only -----------------------------------------------------------
     # coil 50: 1 = no alarm, 0 = active alarm (the "alarm" sensor reports which one, from the coil list)
     "alarm_status": _ro(50, "text", type="boolean", slow=False, data_type=C, options={True: "ok", False: "alarm"}),

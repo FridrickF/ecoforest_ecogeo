@@ -383,6 +383,38 @@
           "ok": "Nessun allarme",
           "alarm": "Allarme attivo"
         }
+      },
+      "compressor_state": {
+        "name": "Stato compressore",
+        "state": {
+          "off": "Spento",
+          "starting": "Avvio",
+          "running": "In marcia"
+        }
+      },
+      "t_heating_flow_setpoint": {
+        "name": "Setpoint mandata riscaldamento (curva)"
+      },
+      "t_heating_return_setpoint": {
+        "name": "Secondo setpoint riscaldamento (curva, ipotesi)"
+      },
+      "t_dhw_setpoint_effective": {
+        "name": "Setpoint ACS in vigore (fascia oraria)"
+      },
+      "compressor_capacity_request": {
+        "name": "Richiesta potenza compressore (ipotesi)"
+      },
+      "heating_demand_integral": {
+        "name": "Integrale richiesta riscaldamento (ipotesi)"
+      },
+      "startup_countdown": {
+        "name": "Conto alla rovescia fase di avvio"
+      },
+      "circulation": {
+        "name": "Circolazione (ipotesi)"
+      },
+      "status_bits": {
+        "name": "Bit di stato (5138)"
       }
     },
     "number": {

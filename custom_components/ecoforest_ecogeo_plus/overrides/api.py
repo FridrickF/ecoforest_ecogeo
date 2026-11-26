@@ -28,6 +28,8 @@ DUMP_RANGES = {
     DataTypes.Register: [(1, 300), (2000, 40), (5000, 330), (7000, 10)],
 }
 RETRY_PAUSE = 0.3
+RETRIES = 3  # -4 / -5 = gateway busy: wait a bit longer at every attempt
+MAX_STALE_POLLS = 3  # a required block may fail this many polls in a row: last values are kept
 
 OP_TYPE_GET_SWITCH = 2001
 OP_TYPE_SET_SWITCH = 2011
@@ -319,6 +321,7 @@ class EcoGeoApi(EcoforestApi):
         self._state = {DataTypes.Coil: {}, DataTypes.Register: {}}
         self._cycle = 0
         self._failures: dict[tuple[int, int], int] = {}
+        self._stale: dict[tuple[int, int], int] = {}
         # keys of the entities that are enabled (set by the coordinator); None = read everything
         self.wanted: set[str] | None = None
         self.slow_every = SLOW_EVERY
@@ -341,10 +344,25 @@ class EcoGeoApi(EcoforestApi):
     async def get(self) -> EcoGeoDevice:
         state = self._state
 
-        # required blocks: any failure is an error, as before
+        # required blocks: an isolated failure (gateway busy) keeps the last values,
+        # only MAX_STALE_POLLS failures in a row (or no previous values) are an error
         for dt in [DataTypes.Coil, DataTypes.Register]:
             for request in REQUESTS[dt]:
-                state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
+                key = (dt, request["address"])
+                try:
+                    state[dt].update(await self._load_data(request["address"], request["length"], Operations.Get[dt]))
+                    self._stale[key] = 0
+                except EcoforestConnectionError:
+                    raise
+                except EcoforestError as err:
+                    span = range(request["address"], request["address"] + request["length"])
+                    self._stale[key] = self._stale.get(key, 0) + 1
+                    if self._stale[key] > MAX_STALE_POLLS or not all(a in state[dt] for a in span):
+                        raise
+                    _LOGGER.debug(
+                        "block %s/%s/%s not read (%s), keeping last values (%s/%s)",
+                        dt, request["address"], request["length"], err, self._stale[key], MAX_STALE_POLLS,
+                    )
 
         # optional blocks: only if an enabled entity needs them; tolerated on failure;
         # "slow" ones are refreshed every SLOW_EVERY polls
@@ -420,7 +438,7 @@ class EcoGeoApi(EcoforestApi):
 
     async def _load_data(self, address, length, op_type) -> dict[int, str]:
         last_error: Exception | None = None
-        for attempt in range(2):  # the gateway sometimes answers -4 / garbage when busy
+        for attempt in range(RETRIES):  # the gateway answers -4 / -5 / garbage when busy
             try:
                 response = await self._request(
                     data={"idOperacion": op_type, "dir": address, "num": length}
@@ -434,7 +452,8 @@ class EcoGeoApi(EcoforestApi):
             except EcoforestError as err:
                 last_error = err
                 _LOGGER.debug("read %s/%s failed (%s), attempt %s", address, length, err, attempt + 1)
-                await asyncio.sleep(RETRY_PAUSE)
+                if attempt + 1 < RETRIES:
+                    await asyncio.sleep(RETRY_PAUSE * (attempt + 1))
         raise last_error
 
     async def dump(self, ranges: dict[int, list[tuple[int, int]]] | None = None, chunk: int = 30, pause: float = 0.3) -> dict:

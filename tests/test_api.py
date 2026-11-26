@@ -120,9 +120,12 @@ async def test_load_data_validates_and_retries(monkeypatch):
     ok = await RawApi([EcoforestError("-4"), ["dir=1", "num=2", "0001", "00ff"]])._load_data(1, 2, 2002)
     assert ok == {1: "0001", 2: "00ff"}
     with pytest.raises(EcoforestError):
-        await RawApi([["num=2", "0001"], ["num=2", "0001"]])._load_data(1, 2, 2002)  # too short / not hex
+        await RawApi([["num=2", "0001"]] * 3)._load_data(1, 2, 2002)  # too short / not hex
     with pytest.raises(EcoforestError):
-        await RawApi([["x", "zz", "0001"], ["x", "zz", "0001"]])._load_data(1, 2, 2002)
+        await RawApi([["x", "zz", "0001"]] * 3)._load_data(1, 2, 2002)
+    # -5 (busy) twice, then a good answer: the third attempt wins
+    ok = await RawApi([EcoforestError("-5"), EcoforestError("-5"), ["0007"]])._load_data(9, 1, 2002)
+    assert ok == {9: "0007"}
 
 
 @pytest.mark.asyncio
@@ -374,3 +377,65 @@ async def test_requests_to_the_gateway_are_serialized(monkeypatch):
     api = EcoGeoApi("http://x/", "u", "p")
     await asyncio.gather(*(api._request({"a": i}) for i in range(5)))
     assert running["max"] == 1
+
+
+class BusyApi(FakeApi):
+    """FakeApi whose register block at `busy` answers -5 while `busy_left` > 0."""
+
+    def __init__(self, *a, busy=None, **kw):
+        super().__init__(*a, **kw)
+        self.busy = busy
+        self.busy_left = 0
+
+    async def _request(self, data=None):
+        if data["dir"] == self.busy and data["idOperacion"] == 2002 and self.busy_left > 0:
+            self.busy_left -= 1
+            raise EcoforestError("bad response: error_geo_get_reg=-5")
+        return await super()._request(data)
+
+
+@pytest.mark.asyncio
+async def test_required_block_busy_keeps_last_values(monkeypatch):
+    monkeypatch.setattr(api_mod, "RETRY_PAUSE", 0)
+    api = BusyApi(registers={**regs(), 200: "0160"}, busy=194)
+    assert (await api.get()).state["t_heating"] == 35.2
+    api.registers[200] = "0170"
+    api.busy_left = api_mod.RETRIES  # one whole poll fails
+    assert (await api.get()).state["t_heating"] == 35.2  # last value kept, no error
+    assert (await api.get()).state["t_heating"] == 36.8  # next poll reads again
+    api.busy_left = api_mod.RETRIES * (api_mod.MAX_STALE_POLLS + 1)
+    for _ in range(api_mod.MAX_STALE_POLLS):
+        await api.get()
+    with pytest.raises(EcoforestError):
+        await api.get()
+
+
+@pytest.mark.asyncio
+async def test_required_block_busy_without_previous_values_fails(monkeypatch):
+    monkeypatch.setattr(api_mod, "RETRY_PAUSE", 0)
+    api = BusyApi(registers=regs(), busy=194)
+    api.busy_left = api_mod.RETRIES
+    with pytest.raises(EcoforestError):
+        await api.get()
+
+
+@pytest.mark.asyncio
+async def test_registers_found_with_the_dumps():
+    api = FakeApi(registers={
+        **regs(), 5062: "0003", 5065: "0136", 5066: "00fc", 214: "01f4", 5033: "01c4",
+        5210: "01ad", 5280: "000f", 5296: "0064", 5138: "8840",
+    })
+    s = (await api.get()).state
+    assert s["compressor_state"] == "running"
+    assert s["t_heating_flow_setpoint"] == 31.0
+    assert s["t_heating_return_setpoint"] == 25.2
+    assert s["t_dhw_setpoint_effective"] == 50.0
+    assert s["compressor_capacity_request"] == 45.2
+    assert s["heating_demand_integral"] == 429
+    assert s["startup_countdown"] == 15
+    assert s["circulation"] == 100
+    assert s["status_bits"] == -30656
+    for key in ("compressor_state", "t_heating_flow_setpoint", "t_dhw_setpoint_effective", "startup_countdown"):
+        assert MAPPING[key]["enabled_default"] is True
+    api.registers[5062] = "0002"  # never seen: unknown state -> None, not an error
+    assert (await api.get()).state["compressor_state"] is None
