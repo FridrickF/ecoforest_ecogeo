@@ -240,25 +240,25 @@
         }
       },
       "energy_heating_month": {
-        "name": "Energia di riscaldamento (mese corrente)"
+        "name": "Energia di riscaldamento mensile"
       },
       "energy_cooling_month": {
-        "name": "Energia di raffreddamento (mese corrente)"
+        "name": "Energia di raffreddamento mensile"
       },
       "energy_electric_month": {
-        "name": "Consumo elettrico (mese corrente)"
+        "name": "Consumo elettrico mensile"
       },
       "energy_heating_year": {
-        "name": "Energia di riscaldamento (12 mesi)"
+        "name": "Energia di riscaldamento annuale"
       },
       "energy_cooling_year": {
-        "name": "Energia di raffreddamento (12 mesi)"
+        "name": "Energia di raffreddamento annuale"
       },
       "energy_electric_year": {
-        "name": "Consumo elettrico (12 mesi)"
+        "name": "Consumo elettrico annuale"
       },
       "pf_year": {
-        "name": "SPF annuale (12 mesi)"
+        "name": "SPF annuale"
       },
       "number_dhw_setpoint": {
         "name": "Setpoint ACS (sola lettura)"

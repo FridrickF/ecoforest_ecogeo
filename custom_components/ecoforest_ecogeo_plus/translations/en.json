@@ -240,25 +240,25 @@
         }
       },
       "energy_heating_month": {
-        "name": "Heating energy (current month)"
+        "name": "Monthly heating energy"
       },
       "energy_cooling_month": {
-        "name": "Cooling energy (current month)"
+        "name": "Monthly cooling energy"
       },
       "energy_electric_month": {
-        "name": "Electrical consumption (current month)"
+        "name": "Monthly electrical consumption"
       },
       "energy_heating_year": {
-        "name": "Heating energy (12 months)"
+        "name": "Annual heating energy"
       },
       "energy_cooling_year": {
-        "name": "Cooling energy (12 months)"
+        "name": "Annual cooling energy"
       },
       "energy_electric_year": {
-        "name": "Electrical consumption (12 months)"
+        "name": "Annual electrical consumption"
       },
       "pf_year": {
-        "name": "Annual SPF (12 months)"
+        "name": "Annual SPF"
       },
       "number_dhw_setpoint": {
         "name": "DHW set temperature (read only)"
