@@ -336,9 +336,9 @@ class EcoGeoApi(EcoforestApi):
             return True
         span = set(range(request["address"], request["address"] + request["length"]))
         for key in self.wanted:
-            needs = addresses_of(MAPPING.get(key, {}))
-            if needs and needs[0] == dt and needs[1] & span:
-                return True
+            for needs_dt, needs in addresses_of(MAPPING.get(key, {})):
+                if needs_dt == dt and needs & span:
+                    return True
         return False
 
     async def get(self) -> EcoGeoDevice:
@@ -389,6 +389,7 @@ class EcoGeoApi(EcoforestApi):
                     )
 
         device_info = {}
+        attributes: dict[str, dict] = {}
         for name, definition in MAPPING.items():
             if definition["type"] == "custom":
                 continue
@@ -427,14 +428,19 @@ class EcoGeoApi(EcoforestApi):
                 continue
             try:
                 device_info[name] = definition["value_fn"](device_info, state)
-            except (KeyError, TypeError):
+            except (KeyError, TypeError, ValueError):
                 if not definition.get("optional"):
                     raise
                 device_info[name] = None
+            if "attrs_fn" in definition:
+                try:
+                    attributes[name] = definition["attrs_fn"](device_info, state)
+                except (KeyError, TypeError, ValueError):
+                    attributes[name] = {}
 
         _LOGGER.debug(device_info)
         _LOGGER.debug(state)
-        return EcoGeoDevice.build(self.parse_model_name(state), device_info)
+        return EcoGeoDevice.build(self.parse_model_name(state), device_info, attributes)
 
     async def _load_data(self, address, length, op_type) -> dict[int, str]:
         last_error: Exception | None = None

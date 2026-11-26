@@ -52,3 +52,8 @@ class EcoforestSensor(SensorEntity, EcoforestEntity):
             return self.entity_description.value_fn(self.data)
 
         return self.data.state[self.entity_description.key]
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        """Monthly history (energy / PF sensors), None for the others."""
+        return self.data.attributes.get(self.entity_description.key) or None

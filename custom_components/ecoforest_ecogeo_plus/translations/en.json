@@ -229,114 +229,6 @@
       "device_clock": {
         "name": "Device clock"
       },
-      "energy_condensation_01": {
-        "name": "Heating energy January"
-      },
-      "energy_evaporation_01": {
-        "name": "Cooling energy January"
-      },
-      "energy_electric_01": {
-        "name": "Electrical consumption January"
-      },
-      "energy_condensation_02": {
-        "name": "Heating energy February"
-      },
-      "energy_evaporation_02": {
-        "name": "Cooling energy February"
-      },
-      "energy_electric_02": {
-        "name": "Electrical consumption February"
-      },
-      "energy_condensation_03": {
-        "name": "Heating energy March"
-      },
-      "energy_evaporation_03": {
-        "name": "Cooling energy March"
-      },
-      "energy_electric_03": {
-        "name": "Electrical consumption March"
-      },
-      "energy_condensation_04": {
-        "name": "Heating energy April"
-      },
-      "energy_evaporation_04": {
-        "name": "Cooling energy April"
-      },
-      "energy_electric_04": {
-        "name": "Electrical consumption April"
-      },
-      "energy_condensation_05": {
-        "name": "Heating energy May"
-      },
-      "energy_evaporation_05": {
-        "name": "Cooling energy May"
-      },
-      "energy_electric_05": {
-        "name": "Electrical consumption May"
-      },
-      "energy_condensation_06": {
-        "name": "Heating energy June"
-      },
-      "energy_evaporation_06": {
-        "name": "Cooling energy June"
-      },
-      "energy_electric_06": {
-        "name": "Electrical consumption June"
-      },
-      "energy_condensation_07": {
-        "name": "Heating energy July"
-      },
-      "energy_evaporation_07": {
-        "name": "Cooling energy July"
-      },
-      "energy_electric_07": {
-        "name": "Electrical consumption July"
-      },
-      "energy_condensation_08": {
-        "name": "Heating energy August"
-      },
-      "energy_evaporation_08": {
-        "name": "Cooling energy August"
-      },
-      "energy_electric_08": {
-        "name": "Electrical consumption August"
-      },
-      "energy_condensation_09": {
-        "name": "Heating energy September"
-      },
-      "energy_evaporation_09": {
-        "name": "Cooling energy September"
-      },
-      "energy_electric_09": {
-        "name": "Electrical consumption September"
-      },
-      "energy_condensation_10": {
-        "name": "Heating energy October"
-      },
-      "energy_evaporation_10": {
-        "name": "Cooling energy October"
-      },
-      "energy_electric_10": {
-        "name": "Electrical consumption October"
-      },
-      "energy_condensation_11": {
-        "name": "Heating energy November"
-      },
-      "energy_evaporation_11": {
-        "name": "Cooling energy November"
-      },
-      "energy_electric_11": {
-        "name": "Electrical consumption November"
-      },
-      "energy_condensation_12": {
-        "name": "Heating energy December"
-      },
-      "energy_evaporation_12": {
-        "name": "Cooling energy December"
-      },
-      "energy_electric_12": {
-        "name": "Electrical consumption December"
-      },
       "program_mode": {
         "name": "Monitor program (winter/summer/auto)",
         "state": {
@@ -427,6 +319,12 @@
       },
       "ground_ratio": {
         "name": "Geothermal share"
+      },
+      "pf_month": {
+        "name": "PF (current month)"
+      },
+      "night_band": {
+        "name": "Night band"
       }
     },
     "number": {

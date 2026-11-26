@@ -229,114 +229,6 @@
       "device_clock": {
         "name": "Orologio dispositivo"
       },
-      "energy_condensation_01": {
-        "name": "Energia di riscaldamento gennaio"
-      },
-      "energy_evaporation_01": {
-        "name": "Energia di raffreddamento gennaio"
-      },
-      "energy_electric_01": {
-        "name": "Consumo elettrico gennaio"
-      },
-      "energy_condensation_02": {
-        "name": "Energia di riscaldamento febbraio"
-      },
-      "energy_evaporation_02": {
-        "name": "Energia di raffreddamento febbraio"
-      },
-      "energy_electric_02": {
-        "name": "Consumo elettrico febbraio"
-      },
-      "energy_condensation_03": {
-        "name": "Energia di riscaldamento marzo"
-      },
-      "energy_evaporation_03": {
-        "name": "Energia di raffreddamento marzo"
-      },
-      "energy_electric_03": {
-        "name": "Consumo elettrico marzo"
-      },
-      "energy_condensation_04": {
-        "name": "Energia di riscaldamento aprile"
-      },
-      "energy_evaporation_04": {
-        "name": "Energia di raffreddamento aprile"
-      },
-      "energy_electric_04": {
-        "name": "Consumo elettrico aprile"
-      },
-      "energy_condensation_05": {
-        "name": "Energia di riscaldamento maggio"
-      },
-      "energy_evaporation_05": {
-        "name": "Energia di raffreddamento maggio"
-      },
-      "energy_electric_05": {
-        "name": "Consumo elettrico maggio"
-      },
-      "energy_condensation_06": {
-        "name": "Energia di riscaldamento giugno"
-      },
-      "energy_evaporation_06": {
-        "name": "Energia di raffreddamento giugno"
-      },
-      "energy_electric_06": {
-        "name": "Consumo elettrico giugno"
-      },
-      "energy_condensation_07": {
-        "name": "Energia di riscaldamento luglio"
-      },
-      "energy_evaporation_07": {
-        "name": "Energia di raffreddamento luglio"
-      },
-      "energy_electric_07": {
-        "name": "Consumo elettrico luglio"
-      },
-      "energy_condensation_08": {
-        "name": "Energia di riscaldamento agosto"
-      },
-      "energy_evaporation_08": {
-        "name": "Energia di raffreddamento agosto"
-      },
-      "energy_electric_08": {
-        "name": "Consumo elettrico agosto"
-      },
-      "energy_condensation_09": {
-        "name": "Energia di riscaldamento settembre"
-      },
-      "energy_evaporation_09": {
-        "name": "Energia di raffreddamento settembre"
-      },
-      "energy_electric_09": {
-        "name": "Consumo elettrico settembre"
-      },
-      "energy_condensation_10": {
-        "name": "Energia di riscaldamento ottobre"
-      },
-      "energy_evaporation_10": {
-        "name": "Energia di raffreddamento ottobre"
-      },
-      "energy_electric_10": {
-        "name": "Consumo elettrico ottobre"
-      },
-      "energy_condensation_11": {
-        "name": "Energia di riscaldamento novembre"
-      },
-      "energy_evaporation_11": {
-        "name": "Energia di raffreddamento novembre"
-      },
-      "energy_electric_11": {
-        "name": "Consumo elettrico novembre"
-      },
-      "energy_condensation_12": {
-        "name": "Energia di riscaldamento dicembre"
-      },
-      "energy_evaporation_12": {
-        "name": "Energia di raffreddamento dicembre"
-      },
-      "energy_electric_12": {
-        "name": "Consumo elettrico dicembre"
-      },
       "program_mode": {
         "name": "Programma impostato sul monitor",
         "state": {
@@ -427,6 +319,12 @@
       },
       "ground_ratio": {
         "name": "Quota geotermica"
+      },
+      "pf_month": {
+        "name": "PF (mese corrente)"
+      },
+      "night_band": {
+        "name": "Fascia notturna"
       }
     },
     "number": {

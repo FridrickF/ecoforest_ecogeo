@@ -8,7 +8,7 @@ from pyecoforest.exceptions import EcoforestConnectionError, EcoforestError
 from custom_components.ecoforest_ecogeo_plus.overrides import api as api_mod
 from custom_components.ecoforest_ecogeo_plus.overrides.api import EcoGeoApi, MAPPING
 from custom_components.ecoforest_ecogeo_plus.overrides.api_types import DataTypes, Operations
-from custom_components.ecoforest_ecogeo_plus.overrides.registers import OPTIONAL_REQUESTS
+from custom_components.ecoforest_ecogeo_plus.overrides.registers import OPTIONAL_REQUESTS, addresses_of
 
 BASE = Path(__file__).resolve().parents[1] / "custom_components" / "ecoforest_ecogeo_plus"
 
@@ -291,19 +291,34 @@ async def test_compressor_limits_and_surplus_numbers():
 @pytest.mark.asyncio
 async def test_monthly_energy_and_year_totals():
     # November (month 11): heating 370, cooling 0, electric 61 kWh; other months heating 100
-    r = {**regs(), 5096: f"{11:04x}"}
+    r = {**regs(), 5096: f"{11:04x}", 5097: f"{26:04x}"}
     for m in range(12):
         r[5144 + m] = f"{(370 if m == 10 else 100):04x}"
         r[5156 + m] = f"{0:04x}"
         r[5168 + m] = f"{(61 if m == 10 else 20):04x}"
     dev = await FakeApi(registers=r).get()
-    assert dev.state["energy_condensation_11"] == 370
+    assert "energy_condensation_11" not in dev.state  # history is now in the attributes
     assert dev.state["energy_heating_month"] == 370
     assert dev.state["energy_cooling_month"] == 0
     assert dev.state["energy_electric_month"] == 61
     assert dev.state["energy_heating_year"] == 1100 + 370
     assert dev.state["energy_electric_year"] == 61 + 220
     assert dev.state["pf_year"] == round(1470 / 281, 1)
+    assert dev.state["pf_month"] == round(370 / 61, 1)
+    history = dev.attributes["energy_heating_month"]
+    assert list(history)[0] == "2025-12" and list(history)[-1] == "2026-11"
+    assert history["2026-11"] == 370 and history["2025-12"] == 100 and len(history) == 12
+    assert dev.attributes["energy_electric_month"]["2026-11"] == 61
+    assert dev.attributes["pf_month"]["2026-11"] == round(370 / 61, 1)
+
+
+@pytest.mark.asyncio
+async def test_night_band():
+    r = {**regs(), 5127: "0017", 5128: "0000", 5129: "0009", 5130: "001e"}
+    dev = await FakeApi(registers=r, coils={104: "1"}).get()
+    assert dev.state["night_band"] == "23:00-09:30"
+    dev = await FakeApi(registers=r, coils={104: "0"}).get()
+    assert dev.state["night_band"] == "off"
 
 
 @pytest.mark.asyncio
@@ -332,10 +347,10 @@ def test_whole_domestic_table_is_mapped():
     integer = [5002, 5004, 5005, *range(5080, 5084), *range(5093, 5098), *range(5144, 5180), 5185,
                *range(5220, 5228), 5281, 5282, 5285, 5286, 5287, 7002, 7003]
     boolean = [50, 53, 127, 128]
-    regs_mapped = {d["address"] for d in MAPPING.values() if d.get("data_type") == DataTypes.Register and "address" in d}
-    regs_mapped |= set(range(5093, 5098))  # device_clock
-    coils_mapped = {d["address"] for d in MAPPING.values() if d.get("data_type") == DataTypes.Coil and "address" in d}
-    coils_mapped |= {127, 128}  # season_mode
+    regs_mapped, coils_mapped = set(), set()
+    for d in MAPPING.values():
+        for dt, addrs in addresses_of(d):
+            (regs_mapped if dt == DataTypes.Register else coils_mapped).update(addrs)
     assert set(analog + integer) <= regs_mapped, sorted(set(analog + integer) - regs_mapped)
     assert set(boolean) <= coils_mapped, sorted(set(boolean) - coils_mapped)
 

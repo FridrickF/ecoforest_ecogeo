@@ -28,6 +28,7 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
     DataTypes.Coil: [
         {"address": 50, "length": 4, "group": "fast"},     # 50 alarm, 51-52, 53 BMS on/off
         {"address": 127, "length": 2, "group": "fast"},    # 127 summer, 128 winter
+        {"address": 104, "length": 1, "group": "slow"},    # night band enabled (prog_horaria.js)
     ],
     DataTypes.Register: [
         {"address": 5024, "length": 1, "group": "fast"},   # program mode (winter/summer/auto/mixed/remote)
@@ -56,6 +57,7 @@ OPTIONAL_REQUESTS: dict[int, list[dict[str, Any]]] = {
         {"address": 5210, "length": 1, "group": "fast"},   # SG2 regulation (per mille)
         {"address": 5280, "length": 1, "group": "fast"},   # start-up countdown (minutes)
         {"address": 5296, "length": 1, "group": "fast"},   # ground share (geothermal ratio)
+        {"address": 5127, "length": 4, "group": "slow"},   # night band start / end (prog_horaria.js)
     ],
 }
 R = DataTypes.Register
@@ -246,14 +248,6 @@ EXTRA_MAPPING.update({
     "number_night_compressor_limit": _number(175, "percentage", 25, 100, 1),
 })
 
-# ---- INTEGER monthly energies 5144-5179 (unit not specified by the guide: Wh/kWh/MWh) ----
-for _i, _m in enumerate(MONTHS):
-    for _name, _base in (("condensation", 5144), ("evaporation", 5156), ("electric", 5168)):
-        EXTRA_MAPPING[f"energy_{_name}_{_m}"] = _ro(
-            _base + _i, "energy", type="int", diagnostic=True
-        )
-
-
 def _season(raw: dict) -> str | None:
     coils = raw[C]
     summer, winter = coils.get(127), coils.get(128)
@@ -275,18 +269,22 @@ def _clock(raw: dict) -> str | None:
     return f"20{y:02d}-{mo:02d}-{d:02d} {h:02d}:{mi:02d}"
 
 
-def addresses_of(definition: dict) -> tuple[int, frozenset[int]] | None:
-    """(data type, addresses) a definition reads, None if it needs nothing optional."""
+def addresses_of(definition: dict) -> list[tuple[int, frozenset[int]]]:
+    """[(data type, addresses)] a definition reads; "reads" may be one (dt, addrs) pair or a list of them."""
     if "address" in definition:
-        return definition["data_type"], frozenset({definition["address"]})
-    if "reads" in definition:
-        dt, addrs = definition["reads"]
-        return dt, frozenset(addrs)
-    return None
+        return [(definition["data_type"], frozenset({definition["address"]}))]
+    reads = definition.get("reads")
+    if not reads:
+        return []
+    if isinstance(reads, tuple):
+        reads = [reads]
+    return [(dt, frozenset(addrs)) for dt, addrs in reads]
 
 
-# ---- derived from the monthly counters (5144-5179, kWh, current month from the device clock 5096) ----
-_COUNTER_BASE = {"heating": 5144, "cooling": 5156, "electric": 5168}  # condensation / evaporation / electric
+# ---- monthly counters 5144-5179 (kWh, Jan..Dec; official page informacion_k.js) ----
+# The current month comes from the device clock (5096, year 5097). Months after the current one still
+# hold last year's values, so the 12 registers are always "the last 12 months".
+_COUNTER_BASE = {"heating": 5144, "cooling": 5156, "electric": 5168}
 
 
 def _counter(raw, kind, month):
@@ -305,22 +303,52 @@ def _current(kind):
     return fn
 
 
+def _history(kind):
+    """{"YYYY-MM": kWh} for the last 12 months, oldest first (sensor attributes)."""
+    def fn(data, raw):
+        m = _month(raw)
+        if m is None:
+            return {}
+        year = 2000 + int(raw[R][5097], 16)
+        out = {}
+        for k in range(m + 1, m + 13):
+            month = (k - 1) % 12 + 1
+            out[f"{year - 1 if month > m else year}-{month:02d}"] = _counter(raw, kind, month)
+        return out
+    return fn
+
+
 def _year(kind):
     def fn(data, raw):
         return sum(_counter(raw, kind, m) for m in range(1, 13))
     return fn
 
 
-def _pf_year(data, raw):
-    heat, cool, el = (_year(k)(data, raw) for k in ("heating", "cooling", "electric"))
+def _pf(heat, cool, el):
     return round((heat + cool) / el, 1) if el else None
 
 
-_READS = (R, (5096, *range(5144, 5180)))
+def _pf_year(data, raw):
+    return _pf(*(_year(k)(data, raw) for k in ("heating", "cooling", "electric")))
+
+
+def _pf_month(data, raw):
+    if _month(raw) is None:
+        return None
+    return _pf(*(_current(k)(data, raw) for k in ("heating", "cooling", "electric")))
+
+
+def _pf_history(data, raw):
+    h, c, e = (_history(k)(data, raw) for k in ("heating", "cooling", "electric"))
+    return {month: _pf(h[month], c[month], e[month]) for month in h}
+
+
+_READS = (R, (5096, 5097, *range(5144, 5180)))
 for _kind in _COUNTER_BASE:
     EXTRA_MAPPING[f"energy_{_kind}_month"] = {
         "data_type": R, "type": "custom", "entity_type": "energy_total", "optional": True,
         "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _current(_kind),
+        "attrs_fn": _history(_kind),
     }
     EXTRA_MAPPING[f"energy_{_kind}_year"] = {
         "data_type": R, "type": "custom", "entity_type": "energy_total", "optional": True,
@@ -329,4 +357,27 @@ for _kind in _COUNTER_BASE:
 EXTRA_MAPPING["pf_year"] = {
     "data_type": R, "type": "custom", "entity_type": "measurement", "optional": True,
     "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _pf_year,
+}
+EXTRA_MAPPING["pf_month"] = {  # the monitor calls it SPF (monthly screen)
+    "data_type": R, "type": "custom", "entity_type": "measurement", "optional": True,
+    "group": "slow", "enabled_default": True, "reads": _READS, "value_fn": _pf_month,
+    "attrs_fn": _pf_history,
+}
+
+
+# ---- night band (prog_horaria.js): coil 104 enabled, 5127:5128 start, 5129:5130 end, 175 compressor % ----
+def _night_band(data, raw):
+    enabled = raw[C].get(104)
+    if enabled is None:
+        return None
+    if enabled == "0":
+        return "off"
+    h1, m1, h2, m2 = (int(raw[R][a], 16) for a in range(5127, 5131))
+    return f"{h1:02d}:{m1:02d}-{h2:02d}:{m2:02d}"
+
+
+EXTRA_MAPPING["night_band"] = {
+    "data_type": R, "type": "custom", "entity_type": "text", "optional": True,
+    "group": "slow", "enabled_default": True,
+    "reads": [(C, (104,)), (R, tuple(range(5127, 5131)))], "value_fn": _night_band,
 }
