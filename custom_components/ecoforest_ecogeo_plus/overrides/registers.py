@@ -381,3 +381,29 @@ EXTRA_MAPPING["night_band"] = {
     "group": "slow", "enabled_default": True,
     "reads": [(C, (104,)), (R, tuple(range(5127, 5131)))], "value_fn": _night_band,
 }
+
+
+# ---- working mode: compressor state 5062 + DHW coil 58 (1 only while making DHW, dump 2026-11-27)
+# + season coils 127/128 ----
+WORKING_MODE = {"off": "off", "starting": "starting", "heating": "heating", "dhw": "dhw", "cooling": "cooling"}
+
+
+def _working_mode(data, raw):
+    state = raw[R].get(5062)
+    if state is None:
+        return None
+    state = int(state, 16)
+    if state == 0:
+        return "off"
+    if state == 1:
+        return "starting"
+    if raw[C].get(58) == "1":
+        return "dhw"
+    return "cooling" if raw[C].get(127) == "1" else "heating"
+
+
+EXTRA_MAPPING["working_mode"] = {
+    "data_type": R, "type": "custom", "entity_type": "text", "optional": True,
+    "group": "fast", "enabled_default": True, "options": WORKING_MODE,
+    "reads": [(R, (5062,)), (C, (58, 127, 128))], "value_fn": _working_mode,
+}

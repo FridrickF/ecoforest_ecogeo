@@ -325,6 +325,16 @@
       },
       "night_band": {
         "name": "Fascia notturna"
+      },
+      "working_mode": {
+        "name": "Modalità di lavoro",
+        "state": {
+          "off": "Spento",
+          "starting": "Avvio",
+          "heating": "Riscaldamento",
+          "dhw": "ACS",
+          "cooling": "Raffrescamento"
+        }
       }
     },
     "number": {

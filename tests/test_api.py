@@ -458,3 +458,15 @@ async def test_registers_found_with_the_dumps():
         assert MAPPING[key]["enabled_default"] is True
     api.registers[5062] = "0002"  # never seen: unknown state -> None, not an error
     assert (await api.get()).state["compressor_state"] is None
+
+
+@pytest.mark.asyncio
+async def test_working_mode():
+    async def mode(state, coils):
+        return (await FakeApi(registers={**regs(), 5062: f"{state:04x}"}, coils=coils).get()).state["working_mode"]
+    assert await mode(0, {58: "1"}) == "off"
+    assert await mode(1, {}) == "starting"
+    assert await mode(3, {58: "1", 128: "1"}) == "dhw"
+    assert await mode(3, {128: "1"}) == "heating"
+    assert await mode(3, {127: "1"}) == "cooling"
+
