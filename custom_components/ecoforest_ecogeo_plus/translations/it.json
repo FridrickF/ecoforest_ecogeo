@@ -87,10 +87,10 @@
         "name": "Temperatura accumulo inerziale riscaldamento"
       },
       "t_dg1_h": {
-        "name": "Temperatura mandata produzione"
+        "name": "Temperatura di produzione DG1 in riscaldamento"
       },
       "t_dg1_c": {
-        "name": "Temperatura reale raffrescamento DG1"
+        "name": "Temperatura di produzione DG1 in raffrescamento"
       },
       "t_sg2": {
         "name": "Temperatura di mandata SG2"

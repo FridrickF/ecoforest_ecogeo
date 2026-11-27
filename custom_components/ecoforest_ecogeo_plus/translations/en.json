@@ -87,10 +87,10 @@
         "name": "Heating buffer tank temperature"
       },
       "t_dg1_h": {
-        "name": "Production temperature Out"
+        "name": "DG1 production temperature in heating"
       },
       "t_dg1_c": {
-        "name": "Cooling DG1 real temperature"
+        "name": "DG1 production temperature in cooling"
       },
       "t_sg2": {
         "name": "Supply temperature SG2"
